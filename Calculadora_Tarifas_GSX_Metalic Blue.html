@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1A3A5C">
+<title>Calculadora · SotaVentoX</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  :root {
+    --green:    #1A3A5C;
+    --green2:   #2E6DA4;
+    --green3:   #C8DDEF;
+    --green4:   #EBF4FB;
+    --result:   #CCDFF4;
+    --rtxt:     #0C2340;
+    --blue:     #1565C0;
+    --bluebg:   #E3F2FD;
+    --yellow:   #F9A825;
+    --yellowbg: #FFFDE7;
+    --gray:     #F5F5F5;
+    --gray2:    #E0E0E0;
+    --dgray:    #616161;
+    --text:     #212121;
+    --white:    #FFFFFF;
+    --shadow:   0 2px 12px rgba(0,0,0,.12);
+    --radius:   14px;
+  }
+  body { font-family: -apple-system, 'Segoe UI', Arial, sans-serif; background: var(--green4); color: var(--text); min-height: 100vh; }
+
+  /* ── HEADER ── */
+  .header { background: var(--green); color: #fff; padding: 18px 20px 14px; position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 8px rgba(0,0,0,.2); }
+  .header-top { display: flex; align-items: center; gap: 10px; }
+  .logo { width: 36px; height: 36px; background: var(--green2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .header h1 { font-size: 17px; font-weight: 700; }
+  .header p  { font-size: 11px; opacity: .75; margin-top: 1px; }
+  .progress-bar { margin-top: 12px; height: 4px; background: rgba(255,255,255,.25); border-radius: 2px; }
+  .progress-fill { height: 100%; background: #60A5FA; border-radius: 2px; transition: width .35s ease; }
+  .step-label { font-size: 10px; opacity: .7; margin-top: 5px; }
+
+  /* ── SCREEN ── */
+  .screen { display: none; padding: 20px 16px 100px; max-width: 480px; margin: 0 auto; }
+  .screen.active { display: block; }
+
+  /* ── CARDS ── */
+  .card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; margin-bottom: 14px; }
+  .card-title { font-size: 13px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 14px; display: flex; align-items: center; gap: 7px; }
+  .card-title span { font-size: 18px; }
+
+  /* ── FORM ELEMENTS ── */
+  label { font-size: 13px; color: var(--dgray); font-weight: 600; display: block; margin-bottom: 6px; }
+  .field { margin-bottom: 16px; }
+  input[type=text], input[type=number] {
+    width: 100%; padding: 14px 16px; font-size: 16px; border: 2px solid var(--gray2);
+    border-radius: 10px; background: var(--bluebg); color: var(--blue); font-weight: 700;
+    outline: none; transition: border-color .2s;
+  }
+  input[type=text]:focus, input[type=number]:focus { border-color: var(--blue); }
+  input[type=number] { font-size: 20px; text-align: center; }
+
+  .monto-prefix { position: relative; }
+  .monto-prefix::before { content: '$'; position: absolute; left: 16px; top: 50%; transform: translateY(-50%); font-size: 20px; color: var(--blue); font-weight: 700; z-index: 1; }
+  .monto-prefix input { padding-left: 34px; }
+
+  /* Toggle pills */
+  .pill-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  .pill { flex: 1; min-width: 80px; padding: 12px 8px; border: 2px solid var(--gray2); border-radius: 10px; background: var(--gray); font-size: 14px; font-weight: 600; color: var(--dgray); cursor: pointer; text-align: center; transition: all .18s; user-select: none; }
+  .pill:hover { border-color: var(--green2); }
+  .pill.selected { background: var(--green); border-color: var(--green); color: #fff; }
+  .pill.selected-alt { background: var(--blue); border-color: var(--blue); color: #fff; }
+
+  /* Deduction row */
+  .deduct-row { border: 1.5px solid var(--gray2); border-radius: 10px; padding: 14px; margin-bottom: 10px; background: var(--gray); transition: background .2s; }
+  .deduct-row.active { background: var(--yellowbg); border-color: var(--yellow); }
+  .deduct-label { font-size: 14px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .deduct-sub { display: none; margin-top: 12px; }
+  .deduct-row.active .deduct-sub { display: block; }
+  .deduct-yn { display: flex; gap: 8px; }
+  .deduct-yn .pill { min-width: 60px; flex: 1; }
+
+  /* ── BUTTONS ── */
+  .btn { display: block; width: 100%; padding: 16px; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; transition: all .18s; }
+  .btn-primary { background: var(--green); color: #fff; box-shadow: 0 4px 14px rgba(45,88,22,.35); }
+  .btn-primary:active { transform: scale(.97); }
+  .btn-secondary { background: var(--white); color: var(--green); border: 2px solid var(--green); }
+  .btn-share { background: #25D366; color: #fff; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 15px; }
+  .btn-row { position: fixed; bottom: 0; left: 0; right: 0; padding: 12px 16px; background: rgba(255,255,255,.95); backdrop-filter: blur(10px); box-shadow: 0 -2px 12px rgba(0,0,0,.1); z-index: 9; display: flex; gap: 10px; max-width: 480px; margin: 0 auto; }
+  .btn-row .btn { flex: 1; padding: 14px; }
+
+  /* ── RESULT ── */
+  .result-hero { background: linear-gradient(135deg, #1A3A5C, #2E6DA4); border-radius: var(--radius); padding: 22px; color: #fff; margin-bottom: 14px; text-align: center; }
+  .result-caso { font-size: 13px; opacity: .8; margin-bottom: 4px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+  .result-desc { font-size: 13px; opacity: .75; margin-top: 8px; line-height: 1.5; }
+
+  .result-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--gray2); }
+  .result-row:last-child { border-bottom: none; }
+  .result-row-label { font-size: 13px; color: var(--dgray); }
+  .result-row-val { font-size: 15px; font-weight: 700; color: var(--text); }
+
+  .party-card { border-radius: var(--radius); padding: 18px 20px; margin-bottom: 12px; }
+  .party-card.colabo { background: var(--result); }
+  .party-card.negocio { background: var(--bluebg); }
+  .party-name { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; margin-bottom: 4px; }
+  .party-name.colabo { color: var(--rtxt); }
+  .party-name.negocio { color: var(--blue); }
+  .party-total { font-size: 28px; font-weight: 800; }
+  .party-total.colabo { color: var(--rtxt); }
+  .party-total.negocio { color: var(--blue); }
+  .party-sub { font-size: 11px; margin-top: 2px; color: var(--dgray); }
+  .party-breakdown { margin-top: 10px; font-size: 12px; color: var(--dgray); line-height: 1.8; }
+
+  .verify-chip { display: inline-flex; align-items: center; gap: 5px; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-top: 6px; }
+  .verify-ok  { background: var(--result); color: var(--rtxt); }
+  .verify-err { background: #FFEBEE; color: #C62828; }
+
+  .chip { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; background: rgba(255,255,255,.25); margin-bottom: 4px; }
+
+  /* ── HOME ── */
+  .home-hero { background: linear-gradient(160deg, #1A3A5C 0%, #2E6DA4 100%); border-radius: var(--radius); padding: 30px 22px; color: #fff; text-align: center; margin-bottom: 16px; box-shadow: var(--shadow); }
+  .home-hero h2 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+  .home-hero p { font-size: 13px; opacity: .8; line-height: 1.6; }
+  .home-icon { font-size: 44px; margin-bottom: 10px; }
+  .steps-preview { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; margin-bottom: 16px; }
+  .step-item { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-bottom: 1px solid var(--gray2); }
+  .step-item:last-child { border-bottom: none; }
+  .step-num { width: 30px; height: 30px; border-radius: 50%; background: var(--green); color: #fff; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .step-text { font-size: 13px; }
+  .step-text strong { display: block; font-weight: 700; }
+  .step-text span { color: var(--dgray); font-size: 12px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-top">
+    <div class="logo">🌿</div>
+    <div>
+      <h1>Calculadora de Tarifa</h1>
+      <p id="headerSub">Grupo SotaVentoX</p>
+    </div>
+  </div>
+  <div class="progress-bar" id="progressBar" style="display:none">
+    <div class="progress-fill" id="progressFill" style="width:0%"></div>
+  </div>
+  <div class="step-label" id="stepLabel"></div>
+</div>
+
+<!-- ════════ SCREEN 0: HOME ════════ -->
+<div class="screen active" id="s0">
+  <div style="max-width:480px;margin:0 auto;padding:20px 16px 100px;">
+    <div class="home-hero">
+      <div class="home-icon">🧮</div>
+      <h2>¿Cuánto le toca a cada quien?</h2>
+      <p>Ingresa los datos del trabajo y calcula al instante cuánto recibes tú y cuánto el negocio — sin Excel, sin matemáticas.</p>
+    </div>
+    <div class="steps-preview">
+      <div class="step-item"><div class="step-num">1</div><div class="step-text"><strong>Datos del trabajo</strong><span>Cobro total y tipo de servicio</span></div></div>
+      <div class="step-item"><div class="step-num">2</div><div class="step-text"><strong>Deducciones</strong><span>Materiales, transporte u otros gastos</span></div></div>
+      <div class="step-item"><div class="step-num">3</div><div class="step-text"><strong>¿Quién aportó qué?</strong><span>Cliente, herramientas y materiales</span></div></div>
+      <div class="step-item"><div class="step-num">4</div><div class="step-text"><strong>Resultado</strong><span>Desglose claro para cada parte</span></div></div>
+    </div>
+    <button class="btn btn-primary" onclick="goTo(1)">🚀 Iniciar cálculo</button>
+  </div>
+</div>
+
+<!-- ════════ SCREEN 1: DATOS DEL TRABAJO ════════ -->
+<div class="screen" id="s1">
+  <div class="card">
+    <div class="card-title"><span>📋</span> Datos del trabajo</div>
+
+    <div class="field">
+      <label>Descripción del servicio</label>
+      <input type="text" id="descripcion" placeholder="Ej: Mantenimiento correctivo 2 cámaras" />
+    </div>
+
+    <div class="field">
+      <label>Cobro total al cliente</label>
+      <div class="monto-prefix">
+        <input type="number" id="cobro" placeholder="0.00" min="0" step="0.01" inputmode="decimal" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Unidad de negocio</label>
+      <div class="pill-group">
+        <div class="pill selected" data-group="unidad" data-val="ConectaX" onclick="selectPill(this)">📷 ConectaX</div>
+        <div class="pill" data-group="unidad" data-val="VerdeX" onclick="selectPill(this)">🌿 VerdeX</div>
+      </div>
+    </div>
+  </div>
+  <div class="btn-row"><button class="btn btn-primary" onclick="validateStep1()">Siguiente →</button></div>
+</div>
+
+<!-- ════════ SCREEN 2: DEDUCCIONES ════════ -->
+<div class="screen" id="s2">
+  <div class="card">
+    <div class="card-title"><span>💸</span> Deducciones</div>
+    <p style="font-size:12px;color:var(--dgray);margin-bottom:16px;line-height:1.6;">Estos montos se descuentan <strong>antes</strong> del split. Quien los pagó los recupera directamente.</p>
+
+    <!-- Materiales -->
+    <div class="deduct-row" id="dr-mat">
+      <div class="deduct-label">🧱 Materiales</div>
+      <div class="deduct-yn">
+        <div class="pill" data-deduct="mat" data-yn="si" onclick="toggleDeduct(this)">✅ Sí hubo</div>
+        <div class="pill selected" data-deduct="mat" data-yn="no" onclick="toggleDeduct(this)">❌ No hubo</div>
+      </div>
+      <div class="deduct-sub" id="ds-mat">
+        <div class="field" style="margin-top:10px;margin-bottom:12px;">
+          <label>¿Quién pagó los materiales?</label>
+          <div class="pill-group">
+            <div class="pill selected" data-group="mat-quien" data-val="Negocio" onclick="selectPill(this)">🏢 Negocio</div>
+            <div class="pill" data-group="mat-quien" data-val="Colaborador" onclick="selectPill(this)">👤 Yo (colaborador)</div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Monto de materiales</label>
+          <div class="monto-prefix"><input type="number" id="mat-monto" placeholder="0.00" min="0" inputmode="decimal"/></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Transporte -->
+    <div class="deduct-row" id="dr-trans">
+      <div class="deduct-label">🚗 Transporte / Viático</div>
+      <div class="deduct-yn">
+        <div class="pill" data-deduct="trans" data-yn="si" onclick="toggleDeduct(this)">✅ Sí hubo</div>
+        <div class="pill selected" data-deduct="trans" data-yn="no" onclick="toggleDeduct(this)">❌ No hubo</div>
+      </div>
+      <div class="deduct-sub" id="ds-trans">
+        <div class="field" style="margin-top:10px;margin-bottom:12px;">
+          <label>¿Quién pagó el transporte?</label>
+          <div class="pill-group">
+            <div class="pill selected" data-group="trans-quien" data-val="Negocio" onclick="selectPill(this)">🏢 Negocio</div>
+            <div class="pill" data-group="trans-quien" data-val="Colaborador" onclick="selectPill(this)">👤 Yo (colaborador)</div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Monto del transporte</label>
+          <div class="monto-prefix"><input type="number" id="trans-monto" placeholder="0.00" min="0" inputmode="decimal"/></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Otro -->
+    <div class="deduct-row" id="dr-otro">
+      <div class="deduct-label">📦 Otro gasto directo</div>
+      <div class="deduct-yn">
+        <div class="pill" data-deduct="otro" data-yn="si" onclick="toggleDeduct(this)">✅ Sí hubo</div>
+        <div class="pill selected" data-deduct="otro" data-yn="no" onclick="toggleDeduct(this)">❌ No hubo</div>
+      </div>
+      <div class="deduct-sub" id="ds-otro">
+        <div class="field" style="margin-top:10px;margin-bottom:12px;">
+          <label>¿Quién pagó este gasto?</label>
+          <div class="pill-group">
+            <div class="pill selected" data-group="otro-quien" data-val="Negocio" onclick="selectPill(this)">🏢 Negocio</div>
+            <div class="pill" data-group="otro-quien" data-val="Colaborador" onclick="selectPill(this)">👤 Yo (colaborador)</div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Monto del gasto</label>
+          <div class="monto-prefix"><input type="number" id="otro-monto" placeholder="0.00" min="0" inputmode="decimal"/></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-secondary" onclick="goTo(1)">← Atrás</button>
+    <button class="btn btn-primary" onclick="goTo(3)">Siguiente →</button>
+  </div>
+</div>
+
+<!-- ════════ SCREEN 3: CONTRIBUCIONES ════════ -->
+<div class="screen" id="s3">
+  <div class="card">
+    <div class="card-title"><span>🤝</span> ¿Quién aportó qué?</div>
+    <p style="font-size:12px;color:var(--dgray);margin-bottom:16px;line-height:1.6;">Estas respuestas determinan el <strong>caso</strong> y el porcentaje de cada quien.</p>
+
+    <div class="field">
+      <label>¿Quién consiguió al cliente?</label>
+      <div class="pill-group">
+        <div class="pill selected" data-group="cliente" data-val="Negocio" onclick="selectPill(this)">🏢 El negocio</div>
+        <div class="pill" data-group="cliente" data-val="Colaborador" onclick="selectPill(this)">👤 Yo lo traje</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>¿Quién aportó las herramientas?</label>
+      <div class="pill-group">
+        <div class="pill selected" data-group="herram" data-val="Negocio" onclick="selectPill(this)">🏢 El negocio</div>
+        <div class="pill" data-group="herram" data-val="Colaborador" onclick="selectPill(this)">👤 Yo las puse</div>
+        <div class="pill" data-group="herram" data-val="Ambos" onclick="selectPill(this)">🤝 Ambos</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>¿Quién puso los materiales?</label>
+      <div class="pill-group">
+        <div class="pill selected" data-group="materiales" data-val="Negocio" onclick="selectPill(this)">🏢 El negocio</div>
+        <div class="pill" data-group="materiales" data-val="Colaborador" onclick="selectPill(this)">👤 Yo los puse</div>
+        <div class="pill" data-group="materiales" data-val="No hubo" onclick="selectPill(this)">🚫 No hubo</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>¿Quién ejecutó el trabajo?</label>
+      <div class="pill-group">
+        <div class="pill selected" data-group="ejecucion" data-val="Colaborador" onclick="selectPill(this)" style="opacity:.7;pointer-events:none;">👤 Colaborador</div>
+      </div>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-secondary" onclick="goTo(2)">← Atrás</button>
+    <button class="btn btn-primary" onclick="calcular()">Calcular 🧮</button>
+  </div>
+</div>
+
+<!-- ════════ SCREEN 4: RESULTADO ════════ -->
+<div class="screen" id="s4">
+  <div id="resultHero" class="result-hero">
+    <div class="chip" id="resCaso">Caso 1</div>
+    <div style="font-size:13px;opacity:.7;margin-bottom:6px;" id="resUnidad">ConectaX</div>
+    <div style="font-size:13px;font-weight:600;" id="resDesc">Servicio</div>
+    <div id="resDescCaso" class="result-desc"></div>
+  </div>
+
+  <!-- Cards de cada parte -->
+  <div class="party-card colabo">
+    <div class="party-name colabo">👤 Colaborador recibe</div>
+    <div class="party-total colabo" id="resTotalColabo">$0.00</div>
+    <div class="party-sub" id="resSubColabo"></div>
+    <div class="party-breakdown" id="resBreakColabo"></div>
+  </div>
+
+  <div class="party-card negocio">
+    <div class="party-name negocio">🏢 Negocio recibe</div>
+    <div class="party-total negocio" id="resTotalNegocio">$0.00</div>
+    <div class="party-sub" id="resSubNegocio"></div>
+    <div class="party-breakdown" id="resBreakNegocio"></div>
+  </div>
+
+  <!-- Detalle -->
+  <div class="card">
+    <div class="card-title"><span>📊</span> Detalle del cálculo</div>
+    <div class="result-row"><span class="result-row-label">Cobro total al cliente</span><span class="result-row-val" id="resCobro">$0</span></div>
+    <div class="result-row"><span class="result-row-label">Total deducciones</span><span class="result-row-val" id="resDeduc" style="color:#E53935;">-$0</span></div>
+    <div class="result-row"><span class="result-row-label"><strong>Base neta a repartir</strong></span><span class="result-row-val" style="color:var(--rtxt);" id="resBase">$0</span></div>
+    <div class="result-row"><span class="result-row-label">% Colaborador</span><span class="result-row-val" id="resPctColabo">40%</span></div>
+    <div class="result-row"><span class="result-row-label">% Negocio</span><span class="result-row-val" id="resPctNegocio">60%</span></div>
+    <div id="verifyChip" style="text-align:center;padding-top:8px;"></div>
+  </div>
+
+  <!-- Botones -->
+  <div style="padding:0 0 20px;">
+    <button class="btn btn-share" onclick="compartirWhatsApp()" style="margin-bottom:10px;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      Compartir resultado por WhatsApp
+    </button>
+    <button class="btn btn-secondary" onclick="reiniciar()">🔄 Nuevo cálculo</button>
+  </div>
+</div>
+
+<script>
+// ── STATE ──
+const state = {
+  descripcion: '', cobro: 0, unidad: 'ConectaX',
+  mat: { yn: 'no', quien: 'Negocio', monto: 0 },
+  trans: { yn: 'no', quien: 'Negocio', monto: 0 },
+  otro: { yn: 'no', quien: 'Negocio', monto: 0 },
+  cliente: 'Negocio', herram: 'Negocio', materiales: 'Negocio',
+  caso: 1, pctColabo: 0.40
+};
+
+// ── NAVIGATION ──
+function goTo(n) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('s' + n).classList.add('active');
+  window.scrollTo(0, 0);
+  updateHeader(n);
+}
+
+function updateHeader(n) {
+  const labels = ['', 'Paso 1 de 3 — Datos del trabajo', 'Paso 2 de 3 — Deducciones', 'Paso 3 de 3 — Contribuciones', 'Resultado final'];
+  const pcts   = [0, 33, 66, 100, 100];
+  const bar = document.getElementById('progressBar');
+  const fill = document.getElementById('progressFill');
+  const lbl = document.getElementById('stepLabel');
+  const sub = document.getElementById('headerSub');
+  if (n === 0) { bar.style.display = 'none'; lbl.textContent = ''; sub.textContent = 'Grupo SotaVentoX'; return; }
+  bar.style.display = 'block';
+  fill.style.width = pcts[n] + '%';
+  lbl.textContent = labels[n];
+  sub.textContent = n === 4 ? (state.descripcion || 'Resultado') : 'Grupo SotaVentoX';
+}
+
+// ── PILL SELECT ──
+function selectPill(el) {
+  const group = el.dataset.group;
+  document.querySelectorAll(`[data-group="${group}"]`).forEach(p => p.classList.remove('selected', 'selected-alt'));
+  el.classList.add('selected');
+  if (group === 'unidad') state.unidad = el.dataset.val;
+  else if (group === 'cliente') state.cliente = el.dataset.val;
+  else if (group === 'herram') state.herram = el.dataset.val;
+  else if (group === 'materiales') state.materiales = el.dataset.val;
+  else if (group === 'mat-quien') state.mat.quien = el.dataset.val;
+  else if (group === 'trans-quien') state.trans.quien = el.dataset.val;
+  else if (group === 'otro-quien') state.otro.quien = el.dataset.val;
+}
+
+// ── DEDUCTION TOGGLE ──
+function toggleDeduct(el) {
+  const key = el.dataset.deduct;
+  const yn  = el.dataset.yn;
+  document.querySelectorAll(`[data-deduct="${key}"]`).forEach(p => p.classList.remove('selected'));
+  el.classList.add('selected');
+  state[key].yn = yn;
+  const row = document.getElementById('dr-' + key);
+  const sub = document.getElementById('ds-' + key);
+  if (yn === 'si') { row.classList.add('active'); } else { row.classList.remove('active'); }
+}
+
+// ── VALIDATION ──
+function validateStep1() {
+  const cobro = parseFloat(document.getElementById('cobro').value);
+  if (!cobro || cobro <= 0) { alert('Ingresa el cobro total al cliente.'); return; }
+  state.cobro = cobro;
+  state.descripcion = document.getElementById('descripcion').value || 'Servicio';
+  goTo(2);
+}
+
+// ── CALCULATE ──
+function calcular() {
+  // Read deducciones
+  ['mat','trans','otro'].forEach(k => {
+    const m = parseFloat(document.getElementById(k + '-monto')?.value) || 0;
+    state[k].monto = state[k].yn === 'si' ? m : 0;
+  });
+
+  // Caso detection
+  const cli  = state.cliente;
+  const mats = state.materiales;
+  if (cli === 'Negocio' && (mats === 'Negocio' || mats === 'No hubo')) state.caso = 1;
+  else if (cli === 'Negocio' && mats === 'Colaborador') state.caso = 2;
+  else if (cli === 'Colaborador' && (mats === 'Negocio' || mats === 'No hubo')) state.caso = 3;
+  else state.caso = 4;
+
+  const pcts = { 1: .40, 2: .50, 3: .55, 4: .65 };
+  state.pctColabo = pcts[state.caso];
+
+  // Maths
+  const cobro    = state.cobro;
+  const totalDed = state.mat.monto + state.trans.monto + state.otro.monto;
+  const base     = Math.max(0, cobro - totalDed);
+  const splitCol = Math.round(base * state.pctColabo * 100) / 100;
+  const splitNeg = Math.round(base * (1 - state.pctColabo) * 100) / 100;
+
+  // Recovery
+  const recCol = (state.mat.yn==='si'&&state.mat.quien==='Colaborador'?state.mat.monto:0)
+               + (state.trans.yn==='si'&&state.trans.quien==='Colaborador'?state.trans.monto:0)
+               + (state.otro.yn==='si'&&state.otro.quien==='Colaborador'?state.otro.monto:0);
+  const recNeg = (state.mat.yn==='si'&&state.mat.quien==='Negocio'?state.mat.monto:0)
+               + (state.trans.yn==='si'&&state.trans.quien==='Negocio'?state.trans.monto:0)
+               + (state.otro.yn==='si'&&state.otro.quien==='Negocio'?state.otro.monto:0);
+
+  const totalCol = Math.round((splitCol + recCol) * 100) / 100;
+  const totalNeg = Math.round((splitNeg + recNeg) * 100) / 100;
+
+  // Descriptions
+  const casoDesc = [
+    '',
+    'Negocio aportó todo: cliente, herramientas y materiales. El colaborador ejecutó.',
+    'Colaborador puso los materiales de su bolsillo. Negocio aportó cliente y herramientas.',
+    'Colaborador consiguió el cliente. Negocio aportó herramientas y materiales.',
+    'Colaborador lo hizo casi todo: trajo el cliente, puso materiales y ejecutó.'
+  ];
+
+  const $f = n => '$' + n.toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2});
+
+  // ── RENDER ──
+  document.getElementById('resCaso').textContent  = 'Caso ' + state.caso;
+  document.getElementById('resUnidad').textContent = state.unidad;
+  document.getElementById('resDesc').textContent   = state.descripcion;
+  document.getElementById('resDescCaso').textContent = casoDesc[state.caso];
+
+  document.getElementById('resTotalColabo').textContent = $f(totalCol);
+  document.getElementById('resTotalNegocio').textContent = $f(totalNeg);
+  document.getElementById('resSubColabo').textContent = `${Math.round(state.pctColabo*100)}% del split (${$f(splitCol)})${recCol > 0 ? ' + recupera '+$f(recCol) : ''}`;
+  document.getElementById('resSubNegocio').textContent = `${Math.round((1-state.pctColabo)*100)}% del split (${$f(splitNeg)})${recNeg > 0 ? ' + recupera '+$f(recNeg) : ''}`;
+
+  // Breakdown detail
+  let breakCol = `• Del split: ${$f(splitCol)}`;
+  if (state.mat.yn==='si'&&state.mat.quien==='Colaborador') breakCol += `\n• Recupera materiales: ${$f(state.mat.monto)}`;
+  if (state.trans.yn==='si'&&state.trans.quien==='Colaborador') breakCol += `\n• Recupera transporte: ${$f(state.trans.monto)}`;
+  if (state.otro.yn==='si'&&state.otro.quien==='Colaborador') breakCol += `\n• Recupera otro gasto: ${$f(state.otro.monto)}`;
+  document.getElementById('resBreakColabo').style.whiteSpace = 'pre-line';
+  document.getElementById('resBreakColabo').textContent = breakCol;
+
+  let breakNeg = `• Del split: ${$f(splitNeg)}`;
+  if (state.mat.yn==='si'&&state.mat.quien==='Negocio') breakNeg += `\n• Recupera materiales: ${$f(state.mat.monto)}`;
+  if (state.trans.yn==='si'&&state.trans.quien==='Negocio') breakNeg += `\n• Recupera transporte: ${$f(state.trans.monto)}`;
+  if (state.otro.yn==='si'&&state.otro.quien==='Negocio') breakNeg += `\n• Recupera otro gasto: ${$f(state.otro.monto)}`;
+  document.getElementById('resBreakNegocio').style.whiteSpace = 'pre-line';
+  document.getElementById('resBreakNegocio').textContent = breakNeg;
+
+  document.getElementById('resCobro').textContent  = $f(cobro);
+  document.getElementById('resDeduc').textContent  = totalDed > 0 ? '-' + $f(totalDed) : '-$0.00';
+  document.getElementById('resBase').textContent   = $f(base);
+  document.getElementById('resPctColabo').textContent = Math.round(state.pctColabo*100) + '%';
+  document.getElementById('resPctNegocio').textContent = Math.round((1-state.pctColabo)*100) + '%';
+
+  const suma = totalCol + totalNeg;
+  const ok = Math.abs(suma - cobro) < 0.02;
+  document.getElementById('verifyChip').innerHTML = ok
+    ? '<span class="verify-chip verify-ok">✓ La suma cuadra con el cobro total</span>'
+    : '<span class="verify-chip verify-err">⚠ Revisar — la suma no coincide</span>';
+
+  // Store for WhatsApp
+  state._result = { cobro, totalDed, base, totalCol, totalNeg, splitCol, splitNeg, recCol, recNeg, $f };
+
+  goTo(4);
+}
+
+// ── SHARE ──
+function compartirWhatsApp() {
+  const r = state._result;
+  if (!r) return;
+  const pctC = Math.round(state.pctColabo * 100);
+  const pctN = 100 - pctC;
+  const lines = [
+    `🧮 *Cálculo de tarifa — ${state.unidad}*`,
+    `📋 ${state.descripcion}`,
+    ``,
+    `💰 Cobro al cliente: ${r.$f(r.cobro)}`,
+    r.totalDed > 0 ? `💸 Deducciones: -${r.$f(r.totalDed)}` : null,
+    `📊 Base neta: ${r.$f(r.base)}`,
+    ``,
+    `⚡ *${['','Caso 1','Caso 2','Caso 3','Caso 4'][state.caso]}* (${pctC}% / ${pctN}%)`,
+    ``,
+    `👤 *Colaborador recibe: ${r.$f(r.totalCol)}*`,
+    `  • Del split (${pctC}%): ${r.$f(r.splitCol)}`,
+    r.recCol > 0 ? `  • Recupera gastos: ${r.$f(r.recCol)}` : null,
+    ``,
+    `🏢 *Negocio recibe: ${r.$f(r.totalNeg)}*`,
+    `  • Del split (${pctN}%): ${r.$f(r.splitNeg)}`,
+    r.recNeg > 0 ? `  • Recupera gastos: ${r.$f(r.recNeg)}` : null,
+    ``,
+    `_Calculado con Calculadora SotaVentoX_`
+  ].filter(l => l !== null).join('\n');
+
+  const url = 'https://wa.me/?text=' + encodeURIComponent(lines);
+  window.open(url, '_blank');
+}
+
+// ── RESET ──
+function reiniciar() {
+  location.reload();
+}
+</script>
+</body>
+</html>
