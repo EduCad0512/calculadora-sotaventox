@@ -2,562 +2,1541 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#1A3A5C">
-<title>Calculadora · SotaVentoX</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Grupo SotaVentoX — Soluciones integrales para el hogar, el negocio y la vida en el Sotavento Veracruzano.">
+<title>Grupo SotaVentoX — Sotavento Veracruzano</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  :root {
-    --green:    #1A3A5C;
-    --green2:   #2E6DA4;
-    --green3:   #C8DDEF;
-    --green4:   #EBF4FB;
-    --result:   #CCDFF4;
-    --rtxt:     #0C2340;
-    --blue:     #1565C0;
-    --bluebg:   #E3F2FD;
-    --yellow:   #F9A825;
-    --yellowbg: #FFFDE7;
-    --gray:     #F5F5F5;
-    --gray2:    #E0E0E0;
-    --dgray:    #616161;
-    --text:     #212121;
-    --white:    #FFFFFF;
-    --shadow:   0 2px 12px rgba(0,0,0,.12);
-    --radius:   14px;
-  }
-  body { font-family: -apple-system, 'Segoe UI', Arial, sans-serif; background: var(--green4); color: var(--text); min-height: 100vh; }
-
-  /* ── HEADER ── */
-  .header { background: var(--green); color: #fff; padding: 18px 20px 14px; position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 8px rgba(0,0,0,.2); }
-  .header-top { display: flex; align-items: center; gap: 10px; }
-  .logo { width: 36px; height: 36px; background: var(--green2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
-  .header h1 { font-size: 17px; font-weight: 700; }
-  .header p  { font-size: 11px; opacity: .75; margin-top: 1px; }
-  .progress-bar { margin-top: 12px; height: 4px; background: rgba(255,255,255,.25); border-radius: 2px; }
-  .progress-fill { height: 100%; background: #60A5FA; border-radius: 2px; transition: width .35s ease; }
-  .step-label { font-size: 10px; opacity: .7; margin-top: 5px; }
-
-  /* ── SCREEN ── */
-  .screen { display: none; padding: 20px 16px 100px; max-width: 480px; margin: 0 auto; }
-  .screen.active { display: block; }
-
-  /* ── CARDS ── */
-  .card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; margin-bottom: 14px; }
-  .card-title { font-size: 13px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 14px; display: flex; align-items: center; gap: 7px; }
-  .card-title span { font-size: 18px; }
-
-  /* ── FORM ELEMENTS ── */
-  label { font-size: 13px; color: var(--dgray); font-weight: 600; display: block; margin-bottom: 6px; }
-  .field { margin-bottom: 16px; }
-  input[type=text], input[type=number] {
-    width: 100%; padding: 14px 16px; font-size: 16px; border: 2px solid var(--gray2);
-    border-radius: 10px; background: var(--bluebg); color: var(--blue); font-weight: 700;
-    outline: none; transition: border-color .2s;
-  }
-  input[type=text]:focus, input[type=number]:focus { border-color: var(--blue); }
-  input[type=number] { font-size: 20px; text-align: center; }
-
-  .monto-prefix { position: relative; }
-  .monto-prefix::before { content: '$'; position: absolute; left: 16px; top: 50%; transform: translateY(-50%); font-size: 20px; color: var(--blue); font-weight: 700; z-index: 1; }
-  .monto-prefix input { padding-left: 34px; }
-
-  /* Toggle pills */
-  .pill-group { display: flex; gap: 8px; flex-wrap: wrap; }
-  .pill { flex: 1; min-width: 80px; padding: 12px 8px; border: 2px solid var(--gray2); border-radius: 10px; background: var(--gray); font-size: 14px; font-weight: 600; color: var(--dgray); cursor: pointer; text-align: center; transition: all .18s; user-select: none; }
-  .pill:hover { border-color: var(--green2); }
-  .pill.selected { background: var(--green); border-color: var(--green); color: #fff; }
-  .pill.selected-alt { background: var(--blue); border-color: var(--blue); color: #fff; }
-
-  /* Deduction row */
-  .deduct-row { border: 1.5px solid var(--gray2); border-radius: 10px; padding: 14px; margin-bottom: 10px; background: var(--gray); transition: background .2s; }
-  .deduct-row.active { background: var(--yellowbg); border-color: var(--yellow); }
-  .deduct-label { font-size: 14px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
-  .deduct-sub { display: none; margin-top: 12px; }
-  .deduct-row.active .deduct-sub { display: block; }
-  .deduct-yn { display: flex; gap: 8px; }
-  .deduct-yn .pill { min-width: 60px; flex: 1; }
-
-  /* ── BUTTONS ── */
-  .btn { display: block; width: 100%; padding: 16px; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; transition: all .18s; }
-  .btn-primary { background: var(--green); color: #fff; box-shadow: 0 4px 14px rgba(45,88,22,.35); }
-  .btn-primary:active { transform: scale(.97); }
-  .btn-secondary { background: var(--white); color: var(--green); border: 2px solid var(--green); }
-  .btn-share { background: #25D366; color: #fff; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 15px; }
-  .btn-row { position: fixed; bottom: 0; left: 0; right: 0; padding: 12px 16px; background: rgba(255,255,255,.95); backdrop-filter: blur(10px); box-shadow: 0 -2px 12px rgba(0,0,0,.1); z-index: 9; display: flex; gap: 10px; max-width: 480px; margin: 0 auto; }
-  .btn-row .btn { flex: 1; padding: 14px; }
-
-  /* ── RESULT ── */
-  .result-hero { background: linear-gradient(135deg, #1A3A5C, #2E6DA4); border-radius: var(--radius); padding: 22px; color: #fff; margin-bottom: 14px; text-align: center; }
-  .result-caso { font-size: 13px; opacity: .8; margin-bottom: 4px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
-  .result-desc { font-size: 13px; opacity: .75; margin-top: 8px; line-height: 1.5; }
-
-  .result-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--gray2); }
-  .result-row:last-child { border-bottom: none; }
-  .result-row-label { font-size: 13px; color: var(--dgray); }
-  .result-row-val { font-size: 15px; font-weight: 700; color: var(--text); }
-
-  .party-card { border-radius: var(--radius); padding: 18px 20px; margin-bottom: 12px; }
-  .party-card.colabo { background: var(--result); }
-  .party-card.negocio { background: var(--bluebg); }
-  .party-name { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; margin-bottom: 4px; }
-  .party-name.colabo { color: var(--rtxt); }
-  .party-name.negocio { color: var(--blue); }
-  .party-total { font-size: 28px; font-weight: 800; }
-  .party-total.colabo { color: var(--rtxt); }
-  .party-total.negocio { color: var(--blue); }
-  .party-sub { font-size: 11px; margin-top: 2px; color: var(--dgray); }
-  .party-breakdown { margin-top: 10px; font-size: 12px; color: var(--dgray); line-height: 1.8; }
-
-  .verify-chip { display: inline-flex; align-items: center; gap: 5px; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-top: 6px; }
-  .verify-ok  { background: var(--result); color: var(--rtxt); }
-  .verify-err { background: #FFEBEE; color: #C62828; }
-
-  .chip { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; background: rgba(255,255,255,.25); margin-bottom: 4px; }
-
-  /* ── HOME ── */
-  .home-hero { background: linear-gradient(160deg, #1A3A5C 0%, #2E6DA4 100%); border-radius: var(--radius); padding: 30px 22px; color: #fff; text-align: center; margin-bottom: 16px; box-shadow: var(--shadow); }
-  .home-hero h2 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
-  .home-hero p { font-size: 13px; opacity: .8; line-height: 1.6; }
-  .home-icon { font-size: 44px; margin-bottom: 10px; }
-  .steps-preview { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; margin-bottom: 16px; }
-  .step-item { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-bottom: 1px solid var(--gray2); }
-  .step-item:last-child { border-bottom: none; }
-  .step-num { width: 30px; height: 30px; border-radius: 50%; background: var(--green); color: #fff; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .step-text { font-size: 13px; }
-  .step-text strong { display: block; font-weight: 700; }
-  .step-text span { color: var(--dgray); font-size: 12px; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cx:#1A3A5C;--cx2:#2E6DA4;--cx3:#D0E8F8;
+  --vx:#2D5816;--vx2:#4A7C2A;--vx3:#EAF4E0;
+  --sx:#92400E;--sx2:#D97706;--sx3:#FEF3C7;
+  --lx:#4C1D95;--lx2:#7C3AED;--lx3:#EDE9FE;
+  --dark:#0F172A;--mid:#1E293B;--gray:#64748B;
+  --light:#F8FAFC;--white:#FFFFFF;--wa:#25D366;
+  --radius:18px;--shadow:0 8px 40px rgba(0,0,0,.18)
+}
+html{scroll-behavior:smooth}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--dark);color:var(--white);overflow-x:hidden}
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:80px 24px 60px;position:relative;background:radial-gradient(ellipse 80% 60% at 50% 0%,#1A3A5C44,transparent),radial-gradient(ellipse 60% 40% at 80% 80%,#2D581620,transparent),var(--dark);overflow:hidden}
+.hero-eyebrow{font-size:12px;letter-spacing:5px;text-transform:uppercase;color:#5BADF0;font-weight:700;margin-bottom:20px;opacity:0;animation:fadeUp .6s .1s forwards}
+.hero-logo{font-size:clamp(42px,8vw,80px);font-weight:900;letter-spacing:-2px;line-height:1;background:linear-gradient(135deg,#fff 30%,#5BADF0 70%,#B2E891 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:12px;opacity:0;animation:fadeUp .7s .2s forwards}
+.hero-tagline{font-size:clamp(16px,2.5vw,22px);color:#94A3B8;max-width:680px;line-height:1.6;margin-bottom:48px;opacity:0;animation:fadeUp .7s .35s forwards}
+.hero-tagline strong{color:#CBD5E1}
+.unit-pills{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:56px;opacity:0;animation:fadeUp .7s .5s forwards}
+.pill{padding:10px 22px;border-radius:100px;font-size:14px;font-weight:600;text-decoration:none;transition:transform .2s,box-shadow .2s;cursor:pointer;border:none}
+.pill:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.pill-cx{background:var(--cx);color:#fff}.pill-vx{background:var(--vx);color:#fff}.pill-sx{background:var(--sx2);color:#fff}.pill-lx{background:var(--lx2);color:#fff}
+.hero-cta{opacity:0;animation:fadeUp .7s .65s forwards}
+.btn-wa{display:inline-flex;align-items:center;gap:10px;background:var(--wa);color:#fff;text-decoration:none;padding:16px 36px;border-radius:100px;font-size:16px;font-weight:700;box-shadow:0 4px 24px rgba(37,211,102,.35);transition:transform .2s,box-shadow .2s}
+.btn-wa:hover{transform:translateY(-3px);box-shadow:0 8px 32px rgba(37,211,102,.5)}
+.btn-wa svg{width:22px;height:22px;fill:#fff}
+.hero-zone{margin-top:28px;font-size:13px;color:#475569;opacity:0;animation:fadeUp .7s .8s forwards}
+</style><style>
+.stats-bar{background:#0B1220;border-top:1px solid #1E293B;border-bottom:1px solid #1E293B;padding:40px 24px}
+.stats-inner{max-width:900px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:32px;text-align:center}
+.stat-num{font-size:clamp(36px,5vw,52px);font-weight:900;background:linear-gradient(135deg,#5BADF0,#B2E891);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
+.stat-label{font-size:13px;color:#64748B;margin-top:6px;line-height:1.4}
+.section{max-width:1200px;margin:0 auto;padding:100px 24px}
+.section-label{font-size:12px;letter-spacing:4px;text-transform:uppercase;font-weight:700;margin-bottom:12px}
+.section-title{font-size:clamp(28px,4vw,44px);font-weight:800;letter-spacing:-1px;margin-bottom:16px}
+.section-sub{font-size:17px;color:#94A3B8;max-width:640px;line-height:1.6;margin-bottom:64px}
+.units-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:32px}
+.unit-card{border-radius:var(--radius);overflow:hidden;border:1px solid #1E293B;transition:transform .3s,box-shadow .3s}
+.unit-card:hover{transform:translateY(-6px);box-shadow:var(--shadow)}
+.unit-card.cx{border-color:#1A3A5C44}.unit-card.vx{border-color:#2D581644}.unit-card.sx{border-color:#92400E44}.unit-card.lx{border-color:#4C1D9544}
+.unit-header{padding:32px 32px 24px}
+.unit-card.cx .unit-header{background:linear-gradient(135deg,#0F172A,#1A3A5C)}
+.unit-card.vx .unit-header{background:linear-gradient(135deg,#0F172A,#2D5816)}
+.unit-card.sx .unit-header{background:linear-gradient(135deg,#0F172A,#92400E)}
+.unit-card.lx .unit-header{background:linear-gradient(135deg,#0F172A,#4C1D95)}
+.unit-emoji{font-size:36px;display:block;margin-bottom:12px}
+.unit-name{font-size:26px;font-weight:800;letter-spacing:-0.5px;margin-bottom:6px}
+.unit-card.cx .unit-name{color:#5BADF0}.unit-card.vx .unit-name{color:#B2E891}.unit-card.sx .unit-name{color:#FBBF24}.unit-card.lx .unit-name{color:#A78BFA}
+.unit-tagline{font-size:14px;color:#94A3B8;line-height:1.4}
+.unit-body{padding:28px 32px 32px;background:#111827}
+.unit-desc{font-size:15px;color:#CBD5E1;line-height:1.65;margin-bottom:24px}
+.services-title{font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#475569;margin-bottom:12px}
+.services-list{list-style:none;display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+.services-list li{background:#1E293B;color:#94A3B8;font-size:13px;padding:5px 12px;border-radius:6px}
+.unit-price{font-size:13px;color:#475569;line-height:1.5;margin-bottom:24px}
+.unit-price strong{color:#CBD5E1}
+.btn-unit{display:inline-flex;align-items:center;gap:8px;background:var(--wa);color:#fff;text-decoration:none;padding:12px 24px;border-radius:10px;font-size:14px;font-weight:600;transition:opacity .2s}
+.btn-unit:hover{opacity:.85}.btn-unit svg{width:18px;height:18px;fill:#fff}
+.why-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px;margin-top:48px}
+.why-card{background:#111827;border:1px solid #1E293B;border-radius:14px;padding:28px}
+.why-icon{font-size:28px;margin-bottom:12px}
+.why-title{font-size:16px;font-weight:700;margin-bottom:8px}
+.why-text{font-size:14px;color:#94A3B8;line-height:1.6}
+.cta-section{background:#0B1220;border-top:1px solid #1E293B;padding:80px 24px;text-align:center}
+.cta-title{font-size:clamp(28px,4vw,42px);font-weight:800;letter-spacing:-1px;margin-bottom:16px}
+.cta-sub{font-size:17px;color:#94A3B8;max-width:520px;margin:0 auto 40px;line-height:1.6}
+.cta-btns{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.btn-outline{padding:14px 28px;border-radius:10px;border:1.5px solid #2E6DA4;color:#5BADF0;text-decoration:none;font-weight:600;font-size:15px;transition:background .2s}
+.btn-outline:hover{background:#1A3A5C33}
+footer{background:#0B1220;border-top:1px solid #1E293B;padding:40px 24px;text-align:center}
+.footer-logo{font-size:20px;font-weight:800;letter-spacing:-0.5px;background:linear-gradient(90deg,#5BADF0,#B2E891);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:12px}
+.footer-units{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-bottom:20px}
+.footer-unit{font-size:13px;color:#475569}
+.footer-copy{font-size:12px;color:#334155}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+.reveal{opacity:0;transform:translateY(32px);transition:opacity .6s ease,transform .6s ease}
+.reveal.visible{opacity:1;transform:none}
+@media(max-width:768px){.unit-header,.unit-body{padding-left:24px;padding-right:24px}.units-grid{grid-template-columns:1fr}}
+</style>
+<style>
+#chatFab{position:fixed;bottom:24px;right:24px;width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#1A3A5C,#2E6DA4);border:none;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,.4);z-index:9998;display:flex;align-items:center;justify-content:center;transition:transform .2s,box-shadow .2s}
+#chatFab:hover{transform:scale(1.08);box-shadow:0 8px 28px rgba(0,0,0,.5)}
+#chatFab.open{background:linear-gradient(135deg,#374151,#1F2937)}
+#chatFab svg{width:28px;height:28px;fill:#fff;transition:transform .3s}
+#chatFab.open svg{transform:rotate(45deg)}
+#chatPanel{position:fixed;bottom:96px;right:24px;width:380px;height:600px;border-radius:18px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.5);z-index:9997;transform:scale(0.8) translateY(20px);opacity:0;pointer-events:none;transition:transform .3s,opacity .3s;transform-origin:bottom right}
+#chatPanel.open{transform:scale(1) translateY(0);opacity:1;pointer-events:all}
+#chatPanel iframe{width:100%;height:100%;border:none}
+@media(max-width:480px){#chatPanel{width:calc(100vw - 32px);right:16px;bottom:88px}}
 </style>
 </head>
 <body>
+<section class="hero">
+  <p class="hero-eyebrow">Sotavento Veracruzano · México</p>
+  <h1 class="hero-logo">Grupo SotaVentoX</h1>
+  <p class="hero-tagline">Soluciones integrales para el hogar, el negocio y la vida.<br><strong>Seguridad · Jardines · Gastronomía · Bienestar humano.</strong></p>
+  <div class="unit-pills">
+    <a class="pill pill-cx" href="#conectax">📷 ConectaX</a>
+    <a class="pill pill-vx" href="#verdex">🌿 VerdeX</a>
+    <a class="pill pill-sx" href="#sazonx">🍽️ SazónX</a>
+    <a class="pill pill-lx" href="#legadox">🤝 LegadoX</a>
+  </div>
+  <div class="hero-cta">
+    <a class="btn-wa" href="https://wa.me/5212961058940?text=Hola%2C%20vengo%20de%20la%20p%C3%A1gina%20de%20Grupo%20SotaVentoX" target="_blank">
+      <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      Escríbenos por WhatsApp
+    </a>
+  </div>
+  <p class="hero-zone">📍 Veracruz · Boca del Río · Alvarado · Tlacotalpan · Sotavento Veracruzano</p>
+</section>
+<div class="stats-bar reveal">
+  <div class="stats-inner">
+    <div><div class="stat-num">4</div><div class="stat-label">Unidades de negocio especializadas</div></div>
+    <div><div class="stat-num">1</div><div class="stat-label">Grupo · Un solo número de contacto</div></div>
+    <div><div class="stat-num">0</div><div class="stat-label">Costo en tu primera visita / diagnóstico</div></div>
+    <div><div class="stat-num">&lt;2h</div><div class="stat-label">Tiempo de respuesta en horario laboral</div></div>
+  </div>
+</div>
+<section class="section">
+  <p class="section-label" style="color:#5BADF0">Nuestras unidades</p>
+  <h2 class="section-title">Un grupo, cuatro especialidades.</h2>
+  <p class="section-sub">Cada unidad opera de forma independiente con su propio equipo y enfoque, pero comparte la misma filosofía: trabajo serio, precio justo y atención real.</p>
+  <div class="units-grid">
+    <div class="unit-card cx reveal" id="conectax">
+      <div class="unit-header">
+        <span class="unit-emoji">📷</span>
+        <div class="unit-name">ConectaX</div>
+        <div class="unit-tagline">Instalación y mantenimiento de cámaras de seguridad CCTV e IP</div>
+      </div>
+      <div class="unit-body">
+        <p class="unit-desc">Instalamos, configuramos y damos mantenimiento a sistemas de videovigilancia para hogar, negocio y empresa. Acceso remoto desde tu celular. Diagnóstico sin costo que se descuenta si contratas.</p>
+        <p class="services-title">Servicios</p>
+        <ul class="services-list">
+          <li>Instalación de cámaras IP / CCTV</li><li>DVR y NVR</li><li>Acceso remoto</li>
+          <li>Mantenimiento preventivo</li><li>Correctivo</li><li>Diagnóstico técnico</li><li>Capacitación al usuario</li>
+        </ul>
+        <p class="unit-price">Desde <strong>$300</strong> diagnóstico · <strong>$400</strong> correctivo · <strong>$700</strong> preventivo sistema completo · Instalaciones desde <strong>$5,000</strong></p>
+        <a class="btn-unit" href="https://wa.me/5212961058940?text=Hola%2C%20me%20interesa%20ConectaX%20%E2%80%94%20c%C3%A1maras%20de%20seguridad." target="_blank">
+          <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>Contactar HAL — ConectaX
+        </a>
+      </div>
+    </div>
+    <div class="unit-card vx reveal" id="verdex">
+      <div class="unit-header">
+        <span class="unit-emoji">🌿</span>
+        <div class="unit-name">VerdeX</div>
+        <div class="unit-tagline">Jardinería, paisajismo y mantenimiento de espacios verdes</div>
+      </div>
+      <div class="unit-body">
+        <p class="unit-desc">Diseñamos, instalamos y mantenemos jardines para casas, negocios y condominios. Tres paquetes completos o servicios individuales. Visita de diagnóstico sin costo.</p>
+        <p class="services-title">Servicios</p>
+        <ul class="services-list">
+          <li>Diseño de jardín</li><li>Poda de árboles</li><li>Corte de pasto</li>
+          <li>Fertilización</li><li>Caminitos grava / laja</li><li>Siembra y plantas</li><li>Mantenimiento mensual</li>
+        </ul>
+        <p class="unit-price">Paquete Básico <strong>$2,400</strong> · Intermedio <strong>$4,700</strong> · Premium <strong>$7,300</strong> · Mantenimiento desde <strong>$800/mes</strong></p>
+        <a class="btn-unit" href="https://wa.me/5212961058940?text=Hola%2C%20me%20interesa%20VerdeX%20%E2%80%94%20jardiner%C3%ADa%20y%20paisajismo." target="_blank">
+          <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>Contactar Koli — VerdeX
+        </a>
+      </div>
+    </div>
+    <div class="unit-card sx reveal" id="sazonx">
+      <div class="unit-header">
+        <span class="unit-emoji">🍽️</span>
+        <div class="unit-name">SazónX</div>
+        <div class="unit-tagline">Gastronomía artesanal por encargo · Catering para eventos</div>
+      </div>
+      <div class="unit-body">
+        <p class="unit-desc">Preparamos comida artesanal veracruzana por encargo y atendemos catering para eventos sociales y corporativos. Sin comida corrida — todo se prepara especialmente para ti. Cotizamos sin compromiso.</p>
+        <p class="services-title">Servicios</p>
+        <ul class="services-list">
+          <li>Pedidos por encargo</li><li>Catering para eventos</li><li>Tamales · pozole · antojitos</li>
+          <li>Servicio de mesa</li><li>Fiestas y reuniones</li><li>Cocina veracruzana</li>
+        </ul>
+        <p class="unit-price">Cotización sin costo · Todo por encargo · mínimo 48 h anticipación · <strong>Pregunta por paquetes de evento</strong></p>
+        <a class="btn-unit" href="https://wa.me/5212961058940?text=Hola%2C%20me%20interesa%20Saz%C3%B3nX%20%E2%80%94%20pedidos%20por%20encargo%20y%20catering." target="_blank">
+          <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>Contactar NOVA — SazónX
+        </a>
+      </div>
+    </div>
+    <div class="unit-card lx reveal" id="legadox">
+      <div class="unit-header">
+        <span class="unit-emoji">🤝</span>
+        <div class="unit-name">LegadoX</div>
+        <div class="unit-tagline">Bienestar humano, desarrollo y atención especializada</div>
+      </div>
+      <div class="unit-body">
+        <p class="unit-desc">Atención psicológica individual y familiar, asesoría legal en temas civiles y laborales, cuidado y acompañamiento al adulto mayor, y desarrollo de liderazgo. Primera consulta sin costo.</p>
+        <p class="services-title">Servicios</p>
+        <ul class="services-list">
+          <li>Psicología individual y familiar</li><li>Asesoría legal</li><li>Cuidado adulto mayor</li>
+          <li>Coaching y liderazgo</li><li>Desarrollo personal</li><li>Talleres para equipos</li>
+        </ul>
+        <p class="unit-price">Primera consulta <strong>sin costo</strong> · Atención presencial y en línea · Servicio a domicilio disponible</p>
+        <a class="btn-unit" href="https://wa.me/5212961058940?text=Hola%2C%20me%20interesa%20LegadoX%20%E2%80%94%20bienestar%20y%20desarrollo." target="_blank">
+          <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>Contactar LEGA — LegadoX
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="section" style="padding-top:0">
+  <p class="section-label reveal" style="color:#B2E891">Por qué SotaVentoX</p>
+  <h2 class="section-title reveal">Sin rodeos. Así trabajamos.</h2>
+  <div class="why-grid">
+    <div class="why-card reveal"><div class="why-icon">🔍</div><div class="why-title">Diagnóstico sin costo</div><div class="why-text">En ConectaX y VerdeX la visita de diagnóstico no te cuesta nada. Si decides contratar, se descuenta del total. Sin presión.</div></div>
+    <div class="why-card reveal"><div class="why-icon">💬</div><div class="why-title">Respuesta real, no automática</div><div class="why-text">Respondemos en menos de 2 horas en horario laboral. Hablas con quien hace el trabajo, no con un bot.</div></div>
+    <div class="why-card reveal"><div class="why-icon">💰</div><div class="why-title">Precio claro desde el inicio</div><div class="why-text">Nuestros precios están publicados. Sin sorpresas al final del trabajo ni cobros extras que no se acordaron.</div></div>
+    <div class="why-card reveal"><div class="why-icon">📍</div><div class="why-title">Somos de aquí</div><div class="why-text">Operamos en el Sotavento Veracruzano. Conocemos la zona, los tiempos y las necesidades de la región.</div></div>
+    <div class="why-card reveal"><div class="why-icon">🛡️</div><div class="why-title">Garantía en mano de obra</div><div class="why-text">Si algo no queda bien, regresamos a corregirlo. La calidad del trabajo está respaldada por el nombre del grupo.</div></div>
+    <div class="why-card reveal"><div class="why-icon">🔗</div><div class="why-title">Un solo grupo, cuatro soluciones</div><div class="why-text">Si necesitas cámaras, jardín, catering y acompañamiento al mismo tiempo — un solo número de contacto lo resuelve todo.</div></div>
+  </div>
+</section>
+<section class="cta-section reveal">
+  <h2 class="cta-title">¿En qué te podemos ayudar hoy?</h2>
+  <p class="cta-sub">Escríbenos por WhatsApp y en menos de 2 horas te respondemos con la información que necesitas.</p>
+  <div class="cta-btns">
+    <a class="btn-wa" href="https://wa.me/5212961058940?text=Hola%2C%20vengo%20de%20la%20p%C3%A1gina%20de%20Grupo%20SotaVentoX" target="_blank">
+      <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>Escribir ahora · 296 105 8940
+    </a>
+    <a class="btn-outline" href="#conectax">Ver unidades →</a>
+  </div>
+</section>
+<footer>
+  <div class="footer-logo">Grupo SotaVentoX</div>
+  <div class="footer-units">
+    <span class="footer-unit">📷 ConectaX</span>
+    <span class="footer-unit">🌿 VerdeX</span>
+    <span class="footer-unit">🍽️ SazónX</span>
+    <span class="footer-unit">🤝 LegadoX</span>
+  </div>
+  <p class="footer-copy">Sotavento Veracruzano · México · 296 105 8940 · 2026</p>
+</footer>
+<script>
+const observer=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')});},{threshold:0.12});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{const t=document.querySelector(a.getAttribute('href'));if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});}});
+});
+</script>
+<!-- Chatbot FAB + Panel -->
+<button id="chatFab" onclick="toggleChat()" aria-label="Abrir chat">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:28px;height:28px;stroke:#fff">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+  </svg>
+</button>
+<div id="chatPanel">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --gsxblue:  #1A3A5C;
+  --gsxblue2: #2E6DA4;
+  --gsxblue3: #D0E8F8;
+  --gsxgreen: #2D5816;
+  --gsxgreen2:#4A7C2A;
+  --gsxgreen3:#D6E8C4;
+  --wabg:     #ECE5DD;
+  --wain:     #DCF8C6;
+  --waout:    #FFFFFF;
+  --header:   #1A3A5C;
+  --gray:     #F0F0F0;
+  --dgray:    #667781;
+  --text:     #111B21;
+  --white:    #FFFFFF;
+  --radius:   18px;
+  --shadow:   0 1px 3px rgba(0,0,0,.15);
+}
+#chatPanel{font-family:-apple-system,'Segoe UI',Arial,sans-serif;background:var(--wabg);height:100vh;display:flex;flex-direction:column;overflow:hidden}
 
+/* HEADER */
+.header{background:var(--header);color:#fff;padding:10px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.3);flex-shrink:0;min-height:62px}
+.avatar{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;position:relative}
+.avatar-ehek{background:linear-gradient(135deg,#2E6DA4,#60A5FA)}
+.avatar-hal{background:linear-gradient(135deg,#1A3A5C,#2E6DA4)}
+.avatar-koli{background:linear-gradient(135deg,#2D5816,#4A7C2A)}
+.status-dot{width:10px;height:10px;background:#25D366;border-radius:50%;position:absolute;bottom:1px;right:1px;border:2px solid var(--header)}
+.header-info h2{font-size:16px;font-weight:700}
+.header-info p{font-size:12px;opacity:.75;margin-top:1px}
+.header-badge{margin-left:auto;background:rgba(255,255,255,.15);border-radius:20px;padding:4px 10px;font-size:11px;font-weight:700;white-space:nowrap}
+
+/* CHAT AREA */
+.chat{flex:1;overflow-y:auto;padding:12px 10px 8px;display:flex;flex-direction:column;gap:4px;scroll-behavior:smooth}
+.chat::-webkit-scrollbar{width:4px}
+.chat::-webkit-scrollbar-thumb{background:rgba(0,0,0,.2);border-radius:2px}
+
+/* BUBBLES */
+.bubble-wrap{display:flex;align-items:flex-end;gap:6px;max-width:88%;animation:popIn .2s ease}
+@keyframes popIn{from{opacity:0;transform:scale(.92) translateY(4px)}to{opacity:1;transform:none}}
+.bubble-wrap.bot{align-self:flex-start}
+.bubble-wrap.user{align-self:flex-end;flex-direction:row-reverse}
+.bubble-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;margin-bottom:2px}
+.bubble{padding:9px 14px;border-radius:var(--radius);max-width:100%;word-wrap:break-word;line-height:1.5;font-size:14px;box-shadow:var(--shadow);position:relative}
+.bubble.bot{background:var(--waout);border-bottom-left-radius:4px}
+.bubble.user{background:var(--wain);border-bottom-right-radius:4px;color:var(--text)}
+.bubble-time{font-size:10px;color:var(--dgray);margin-top:3px;text-align:right}
+.bubble-name{font-size:11px;font-weight:700;margin-bottom:4px;color:var(--gsxblue2)}
+.bubble-name.koli{color:var(--gsxgreen2)}
+
+/* TYPING INDICATOR */
+.typing{display:flex;align-items:center;gap:4px;padding:10px 14px;background:var(--waout);border-radius:var(--radius);border-bottom-left-radius:4px;box-shadow:var(--shadow)}
+.typing span{width:7px;height:7px;background:var(--dgray);border-radius:50%;animation:bounce 1.2s infinite}
+.typing span:nth-child(2){animation-delay:.2s}
+.typing span:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
+
+/* QUICK REPLIES */
+.replies{padding:8px 10px;display:flex;flex-wrap:wrap;gap:7px;background:rgba(255,255,255,.6);backdrop-filter:blur(8px);border-top:1px solid rgba(0,0,0,.08);flex-shrink:0}
+.reply-btn{padding:9px 16px;border:2px solid var(--gsxblue2);border-radius:20px;background:#fff;color:var(--gsxblue);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap}
+.reply-btn:active{transform:scale(.96)}
+.reply-btn.green{border-color:var(--gsxgreen2);color:var(--gsxgreen)}
+.reply-btn.accent{background:var(--gsxblue);color:#fff;border-color:var(--gsxblue)}
+.reply-btn.accent-green{background:var(--gsxgreen);color:#fff;border-color:var(--gsxgreen)}
+.reply-btn.wa{background:#25D366;color:#fff;border-color:#25D366}
+
+/* DATE CHIP */
+.date-chip{text-align:center;margin:6px 0}
+.date-chip span{background:rgba(0,0,0,.12);color:#fff;font-size:11px;padding:3px 12px;border-radius:10px}
+
+/* HERO CARD */
+.hero-card{background:linear-gradient(135deg,var(--gsxblue),var(--gsxblue2));border-radius:14px;padding:16px;color:#fff;margin:4px 0;font-size:13px;line-height:1.6}
+.hero-card h3{font-size:16px;margin-bottom:6px}
+.hero-card .tag{display:inline-block;background:rgba(255,255,255,.2);border-radius:10px;padding:2px 10px;font-size:11px;margin-right:4px;margin-top:6px}
+.hero-card.green{background:linear-gradient(135deg,var(--gsxgreen),var(--gsxgreen2))}
+
+/* SERVICE LIST */
+.svc-list{margin-top:8px}
+.svc-item{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.15);font-size:13px}
+.svc-item:last-child{border-bottom:none}
+.svc-price{font-weight:700;white-space:nowrap;margin-left:8px}
+
+/* INPUT ROW */
+.input-row{padding:8px 12px;background:#fff;display:flex;gap:8px;align-items:center;flex-shrink:0;border-top:1px solid var(--gray)}
+.input-row input{flex:1;padding:11px 16px;border:none;border-radius:22px;background:var(--gray);font-size:14px;outline:none}
+.send-btn{width:42px;height:42px;border-radius:50%;background:var(--gsxblue);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.send-btn svg{fill:white}
+</style>
 <!-- HEADER -->
-<div class="header">
-  <div class="header-top">
-    <div class="logo">🌿</div>
-    <div>
-      <h1>Calculadora de Tarifa</h1>
-      <p id="headerSub">Grupo SotaVentoX</p>
-    </div>
+<div class="header" id="mainHeader">
+  <div class="avatar avatar-ehek" id="headerAvatar">🌀</div>
+  <div class="header-info">
+    <h2 id="headerName">EHEK · SotaVentoX</h2>
+    <p id="headerStatus">En línea · Asistente virtual</p>
   </div>
-  <div class="progress-bar" id="progressBar" style="display:none">
-    <div class="progress-fill" id="progressFill" style="width:0%"></div>
-  </div>
-  <div class="step-label" id="stepLabel"></div>
+  <div class="header-badge" id="headerBadge">🤖 Bot</div>
 </div>
 
-<!-- ════════ SCREEN 0: HOME ════════ -->
-<div class="screen active" id="s0">
-  <div style="max-width:480px;margin:0 auto;padding:20px 16px 100px;">
-    <div class="home-hero">
-      <div class="home-icon">🧮</div>
-      <h2>¿Cuánto le toca a cada quien?</h2>
-      <p>Ingresa los datos del trabajo y calcula al instante cuánto recibes tú y cuánto el negocio — sin Excel, sin matemáticas.</p>
-    </div>
-    <div class="steps-preview">
-      <div class="step-item"><div class="step-num">1</div><div class="step-text"><strong>Datos del trabajo</strong><span>Cobro total y tipo de servicio</span></div></div>
-      <div class="step-item"><div class="step-num">2</div><div class="step-text"><strong>Deducciones</strong><span>Materiales, transporte u otros gastos</span></div></div>
-      <div class="step-item"><div class="step-num">3</div><div class="step-text"><strong>¿Quién aportó qué?</strong><span>Cliente, herramientas y materiales</span></div></div>
-      <div class="step-item"><div class="step-num">4</div><div class="step-text"><strong>Resultado</strong><span>Desglose claro para cada parte</span></div></div>
-    </div>
-    <button class="btn btn-primary" onclick="goTo(1)">🚀 Iniciar cálculo</button>
-  </div>
-</div>
+<!-- CHAT MESSAGES -->
+<div class="chat" id="chat"></div>
 
-<!-- ════════ SCREEN 1: DATOS DEL TRABAJO ════════ -->
-<div class="screen" id="s1">
-  <div class="card">
-    <div class="card-title"><span>📋</span> Datos del trabajo</div>
+<!-- QUICK REPLIES -->
+<div class="replies" id="replies"></div>
 
-    <div class="field">
-      <label>Descripción del servicio</label>
-      <input type="text" id="descripcion" placeholder="Ej: Mantenimiento correctivo 2 cámaras" />
-    </div>
-
-    <div class="field">
-      <label>Cobro total al cliente</label>
-      <div class="monto-prefix">
-        <input type="number" id="cobro" placeholder="0.00" min="0" step="0.01" inputmode="decimal" />
-      </div>
-    </div>
-
-    <div class="field">
-      <label>Unidad de negocio</label>
-      <div class="pill-group">
-        <div class="pill selected" data-group="unidad" data-val="ConectaX" onclick="selectPill(this)">📷 ConectaX</div>
-        <div class="pill" data-group="unidad" data-val="VerdeX" onclick="selectPill(this)">🌿 VerdeX</div>
-      </div>
-    </div>
-  </div>
-  <div class="btn-row"><button class="btn btn-primary" onclick="validateStep1()">Siguiente →</button></div>
-</div>
-
-<!-- ════════ SCREEN 2: DEDUCCIONES ════════ -->
-<div class="screen" id="s2">
-  <div class="card">
-    <div class="card-title"><span>💸</span> Deducciones</div>
-    <p style="font-size:12px;color:var(--dgray);margin-bottom:16px;line-height:1.6;">Estos montos se descuentan <strong>antes</strong> del split. Quien los pagó los recupera directamente.</p>
-
-    <!-- Materiales -->
-    <div class="deduct-row" id="dr-mat">
-      <div class="deduct-label">🧱 Materiales</div>
-      <div class="deduct-yn">
-        <div class="pill" data-deduct="mat" data-yn="si" onclick="toggleDeduct(this)">✅ Sí hubo</div>
-        <div class="pill selected" data-deduct="mat" data-yn="no" onclick="toggleDeduct(this)">❌ No hubo</div>
-      </div>
-      <div class="deduct-sub" id="ds-mat">
-        <div class="field" style="margin-top:10px;margin-bottom:12px;">
-          <label>¿Quién pagó los materiales?</label>
-          <div class="pill-group">
-            <div class="pill selected" data-group="mat-quien" data-val="Negocio" onclick="selectPill(this)">🏢 Negocio</div>
-            <div class="pill" data-group="mat-quien" data-val="Colaborador" onclick="selectPill(this)">👤 Yo (colaborador)</div>
-          </div>
-        </div>
-        <div class="field">
-          <label>Monto de materiales</label>
-          <div class="monto-prefix"><input type="number" id="mat-monto" placeholder="0.00" min="0" inputmode="decimal"/></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Transporte -->
-    <div class="deduct-row" id="dr-trans">
-      <div class="deduct-label">🚗 Transporte / Viático</div>
-      <div class="deduct-yn">
-        <div class="pill" data-deduct="trans" data-yn="si" onclick="toggleDeduct(this)">✅ Sí hubo</div>
-        <div class="pill selected" data-deduct="trans" data-yn="no" onclick="toggleDeduct(this)">❌ No hubo</div>
-      </div>
-      <div class="deduct-sub" id="ds-trans">
-        <div class="field" style="margin-top:10px;margin-bottom:12px;">
-          <label>¿Quién pagó el transporte?</label>
-          <div class="pill-group">
-            <div class="pill selected" data-group="trans-quien" data-val="Negocio" onclick="selectPill(this)">🏢 Negocio</div>
-            <div class="pill" data-group="trans-quien" data-val="Colaborador" onclick="selectPill(this)">👤 Yo (colaborador)</div>
-          </div>
-        </div>
-        <div class="field">
-          <label>Monto del transporte</label>
-          <div class="monto-prefix"><input type="number" id="trans-monto" placeholder="0.00" min="0" inputmode="decimal"/></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Otro -->
-    <div class="deduct-row" id="dr-otro">
-      <div class="deduct-label">📦 Otro gasto directo</div>
-      <div class="deduct-yn">
-        <div class="pill" data-deduct="otro" data-yn="si" onclick="toggleDeduct(this)">✅ Sí hubo</div>
-        <div class="pill selected" data-deduct="otro" data-yn="no" onclick="toggleDeduct(this)">❌ No hubo</div>
-      </div>
-      <div class="deduct-sub" id="ds-otro">
-        <div class="field" style="margin-top:10px;margin-bottom:12px;">
-          <label>¿Quién pagó este gasto?</label>
-          <div class="pill-group">
-            <div class="pill selected" data-group="otro-quien" data-val="Negocio" onclick="selectPill(this)">🏢 Negocio</div>
-            <div class="pill" data-group="otro-quien" data-val="Colaborador" onclick="selectPill(this)">👤 Yo (colaborador)</div>
-          </div>
-        </div>
-        <div class="field">
-          <label>Monto del gasto</label>
-          <div class="monto-prefix"><input type="number" id="otro-monto" placeholder="0.00" min="0" inputmode="decimal"/></div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="btn-row">
-    <button class="btn btn-secondary" onclick="goTo(1)">← Atrás</button>
-    <button class="btn btn-primary" onclick="goTo(3)">Siguiente →</button>
-  </div>
-</div>
-
-<!-- ════════ SCREEN 3: CONTRIBUCIONES ════════ -->
-<div class="screen" id="s3">
-  <div class="card">
-    <div class="card-title"><span>🤝</span> ¿Quién aportó qué?</div>
-    <p style="font-size:12px;color:var(--dgray);margin-bottom:16px;line-height:1.6;">Estas respuestas determinan el <strong>caso</strong> y el porcentaje de cada quien.</p>
-
-    <div class="field">
-      <label>¿Quién consiguió al cliente?</label>
-      <div class="pill-group">
-        <div class="pill selected" data-group="cliente" data-val="Negocio" onclick="selectPill(this)">🏢 El negocio</div>
-        <div class="pill" data-group="cliente" data-val="Colaborador" onclick="selectPill(this)">👤 Yo lo traje</div>
-      </div>
-    </div>
-
-    <div class="field">
-      <label>¿Quién aportó las herramientas?</label>
-      <div class="pill-group">
-        <div class="pill selected" data-group="herram" data-val="Negocio" onclick="selectPill(this)">🏢 El negocio</div>
-        <div class="pill" data-group="herram" data-val="Colaborador" onclick="selectPill(this)">👤 Yo las puse</div>
-        <div class="pill" data-group="herram" data-val="Ambos" onclick="selectPill(this)">🤝 Ambos</div>
-      </div>
-    </div>
-
-    <div class="field">
-      <label>¿Quién puso los materiales?</label>
-      <div class="pill-group">
-        <div class="pill selected" data-group="materiales" data-val="Negocio" onclick="selectPill(this)">🏢 El negocio</div>
-        <div class="pill" data-group="materiales" data-val="Colaborador" onclick="selectPill(this)">👤 Yo los puse</div>
-        <div class="pill" data-group="materiales" data-val="No hubo" onclick="selectPill(this)">🚫 No hubo</div>
-      </div>
-    </div>
-
-    <div class="field">
-      <label>¿Quién ejecutó el trabajo?</label>
-      <div class="pill-group">
-        <div class="pill selected" data-group="ejecucion" data-val="Colaborador" onclick="selectPill(this)" style="opacity:.7;pointer-events:none;">👤 Colaborador</div>
-      </div>
-    </div>
-  </div>
-  <div class="btn-row">
-    <button class="btn btn-secondary" onclick="goTo(2)">← Atrás</button>
-    <button class="btn btn-primary" onclick="calcular()">Calcular 🧮</button>
-  </div>
-</div>
-
-<!-- ════════ SCREEN 4: RESULTADO ════════ -->
-<div class="screen" id="s4">
-  <div id="resultHero" class="result-hero">
-    <div class="chip" id="resCaso">Caso 1</div>
-    <div style="font-size:13px;opacity:.7;margin-bottom:6px;" id="resUnidad">ConectaX</div>
-    <div style="font-size:13px;font-weight:600;" id="resDesc">Servicio</div>
-    <div id="resDescCaso" class="result-desc"></div>
-  </div>
-
-  <!-- Cards de cada parte -->
-  <div class="party-card colabo">
-    <div class="party-name colabo">👤 Colaborador recibe</div>
-    <div class="party-total colabo" id="resTotalColabo">$0.00</div>
-    <div class="party-sub" id="resSubColabo"></div>
-    <div class="party-breakdown" id="resBreakColabo"></div>
-  </div>
-
-  <div class="party-card negocio">
-    <div class="party-name negocio">🏢 Negocio recibe</div>
-    <div class="party-total negocio" id="resTotalNegocio">$0.00</div>
-    <div class="party-sub" id="resSubNegocio"></div>
-    <div class="party-breakdown" id="resBreakNegocio"></div>
-  </div>
-
-  <!-- Detalle -->
-  <div class="card">
-    <div class="card-title"><span>📊</span> Detalle del cálculo</div>
-    <div class="result-row"><span class="result-row-label">Cobro total al cliente</span><span class="result-row-val" id="resCobro">$0</span></div>
-    <div class="result-row"><span class="result-row-label">Total deducciones</span><span class="result-row-val" id="resDeduc" style="color:#E53935;">-$0</span></div>
-    <div class="result-row"><span class="result-row-label"><strong>Base neta a repartir</strong></span><span class="result-row-val" style="color:var(--rtxt);" id="resBase">$0</span></div>
-    <div class="result-row"><span class="result-row-label">% Colaborador</span><span class="result-row-val" id="resPctColabo">40%</span></div>
-    <div class="result-row"><span class="result-row-label">% Negocio</span><span class="result-row-val" id="resPctNegocio">60%</span></div>
-    <div id="verifyChip" style="text-align:center;padding-top:8px;"></div>
-  </div>
-
-  <!-- Botones -->
-  <div style="padding:0 0 20px;">
-    <button class="btn btn-share" onclick="compartirWhatsApp()" style="margin-bottom:10px;">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-      Compartir resultado por WhatsApp
-    </button>
-    <button class="btn btn-secondary" onclick="reiniciar()">🔄 Nuevo cálculo</button>
-  </div>
+<!-- INPUT (hidden mostly, for typing feel) -->
+<div class="input-row">
+  <input type="text" id="userInput" placeholder="Escribe un mensaje..." onkeydown="if(event.key==='Enter')sendTyped()">
+  <button class="send-btn" onclick="sendTyped()">
+    <svg width="18" height="18" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+  </button>
 </div>
 
 <script>
-// ── STATE ──
-const state = {
-  descripcion: '', cobro: 0, unidad: 'ConectaX',
-  mat: { yn: 'no', quien: 'Negocio', monto: 0 },
-  trans: { yn: 'no', quien: 'Negocio', monto: 0 },
-  otro: { yn: 'no', quien: 'Negocio', monto: 0 },
-  cliente: 'Negocio', herram: 'Negocio', materiales: 'Negocio',
-  caso: 1, pctColabo: 0.40
+// ════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════
+let ctx = { agent: 'ehek', step: 'start', nombre: '', servicio: '' };
+
+const AGENTS = {
+  ehek: { name:'EHEK · SotaVentoX', status:'En línea · Asistente principal', emoji:'🌀', cls:'avatar-ehek', badge:'🤖 Bot', nameColor:'' },
+  hal:  { name:'HAL · ConectaX',    status:'En línea · Asesor de seguridad', emoji:'🦅', cls:'avatar-hal',  badge:'📷 ConectaX', nameColor:'' },
+  koli: { name:'KOLI · VerdeX',     status:'En línea · Asesor de jardines',  emoji:'🐦', cls:'avatar-koli', badge:'🌿 VerdeX', nameColor:'koli' }
 };
 
-// ── NAVIGATION ──
-function goTo(n) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('s' + n).classList.add('active');
-  window.scrollTo(0, 0);
-  updateHeader(n);
+const now = () => { const d=new Date(); return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0'); };
+
+// ════════════════════════════════════════════
+// RENDER
+// ════════════════════════════════════════════
+function setAgent(id){
+  ctx.agent = id;
+  const a = AGENTS[id];
+  document.getElementById('headerAvatar').className = 'avatar ' + a.cls;
+  document.getElementById('headerAvatar').textContent = a.emoji;
+  document.getElementById('headerName').textContent = a.name;
+  document.getElementById('headerStatus').textContent = a.status;
+  document.getElementById('headerBadge').textContent = a.badge;
 }
 
-function updateHeader(n) {
-  const labels = ['', 'Paso 1 de 3 — Datos del trabajo', 'Paso 2 de 3 — Deducciones', 'Paso 3 de 3 — Contribuciones', 'Resultado final'];
-  const pcts   = [0, 33, 66, 100, 100];
-  const bar = document.getElementById('progressBar');
-  const fill = document.getElementById('progressFill');
-  const lbl = document.getElementById('stepLabel');
-  const sub = document.getElementById('headerSub');
-  if (n === 0) { bar.style.display = 'none'; lbl.textContent = ''; sub.textContent = 'Grupo SotaVentoX'; return; }
-  bar.style.display = 'block';
-  fill.style.width = pcts[n] + '%';
-  lbl.textContent = labels[n];
-  sub.textContent = n === 4 ? (state.descripcion || 'Resultado') : 'Grupo SotaVentoX';
+function addDateChip(txt){
+  const chat = document.getElementById('chat');
+  const d = document.createElement('div');
+  d.className = 'date-chip';
+  d.innerHTML = `<span>${txt}</span>`;
+  chat.appendChild(d);
 }
 
-// ── PILL SELECT ──
-function selectPill(el) {
-  const group = el.dataset.group;
-  document.querySelectorAll(`[data-group="${group}"]`).forEach(p => p.classList.remove('selected', 'selected-alt'));
-  el.classList.add('selected');
-  if (group === 'unidad') state.unidad = el.dataset.val;
-  else if (group === 'cliente') state.cliente = el.dataset.val;
-  else if (group === 'herram') state.herram = el.dataset.val;
-  else if (group === 'materiales') state.materiales = el.dataset.val;
-  else if (group === 'mat-quien') state.mat.quien = el.dataset.val;
-  else if (group === 'trans-quien') state.trans.quien = el.dataset.val;
-  else if (group === 'otro-quien') state.otro.quien = el.dataset.val;
+function addBubble(text, isUser=false, agentId=null){
+  const chat = document.getElementById('chat');
+  const a = AGENTS[agentId || ctx.agent];
+  const wrap = document.createElement('div');
+  wrap.className = 'bubble-wrap ' + (isUser ? 'user' : 'bot');
+
+  if(!isUser){
+    const av = document.createElement('div');
+    av.className = 'bubble-avatar ' + a.cls;
+    av.textContent = a.emoji;
+    wrap.appendChild(av);
+  }
+
+  const inner = document.createElement('div');
+  inner.style.maxWidth = '100%';
+
+  if(!isUser){
+    const name = document.createElement('div');
+    name.className = 'bubble-name ' + (a.nameColor||'');
+    name.textContent = a.name;
+    inner.appendChild(name);
+  }
+
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble ' + (isUser ? 'user' : 'bot');
+  bubble.innerHTML = text;
+  inner.appendChild(bubble);
+
+  const time = document.createElement('div');
+  time.className = 'bubble-time';
+  time.textContent = now() + (isUser ? ' ✓✓' : '');
+  inner.appendChild(time);
+
+  wrap.appendChild(inner);
+  chat.appendChild(wrap);
+  scrollDown();
 }
 
-// ── DEDUCTION TOGGLE ──
-function toggleDeduct(el) {
-  const key = el.dataset.deduct;
-  const yn  = el.dataset.yn;
-  document.querySelectorAll(`[data-deduct="${key}"]`).forEach(p => p.classList.remove('selected'));
-  el.classList.add('selected');
-  state[key].yn = yn;
-  const row = document.getElementById('dr-' + key);
-  const sub = document.getElementById('ds-' + key);
-  if (yn === 'si') { row.classList.add('active'); } else { row.classList.remove('active'); }
+function addCard(html, green=false){
+  const chat = document.getElementById('chat');
+  const a = AGENTS[ctx.agent];
+  const wrap = document.createElement('div');
+  wrap.className = 'bubble-wrap bot';
+
+  const av = document.createElement('div');
+  av.className = 'bubble-avatar ' + a.cls;
+  av.textContent = a.emoji;
+  wrap.appendChild(av);
+
+  const inner = document.createElement('div');
+  inner.style.maxWidth = '82%';
+  const card = document.createElement('div');
+  card.className = 'hero-card' + (green ? ' green' : '');
+  card.innerHTML = html;
+  inner.appendChild(card);
+
+  const time = document.createElement('div');
+  time.className = 'bubble-time';
+  time.textContent = now();
+  inner.appendChild(time);
+
+  wrap.appendChild(inner);
+  chat.appendChild(wrap);
+  scrollDown();
 }
 
-// ── VALIDATION ──
-function validateStep1() {
-  const cobro = parseFloat(document.getElementById('cobro').value);
-  if (!cobro || cobro <= 0) { alert('Ingresa el cobro total al cliente.'); return; }
-  state.cobro = cobro;
-  state.descripcion = document.getElementById('descripcion').value || 'Servicio';
-  goTo(2);
-}
-
-// ── CALCULATE ──
-function calcular() {
-  // Read deducciones
-  ['mat','trans','otro'].forEach(k => {
-    const m = parseFloat(document.getElementById(k + '-monto')?.value) || 0;
-    state[k].monto = state[k].yn === 'si' ? m : 0;
+function showTyping(ms=1100){
+  return new Promise(res=>{
+    const chat = document.getElementById('chat');
+    const a = AGENTS[ctx.agent];
+    const wrap = document.createElement('div');
+    wrap.className = 'bubble-wrap bot';
+    wrap.id = 'typing-indicator';
+    const av = document.createElement('div');
+    av.className = 'bubble-avatar ' + a.cls;
+    av.textContent = a.emoji;
+    wrap.appendChild(av);
+    const t = document.createElement('div');
+    t.className = 'typing';
+    t.innerHTML = '<span></span><span></span><span></span>';
+    wrap.appendChild(t);
+    chat.appendChild(wrap);
+    scrollDown();
+    setTimeout(()=>{ wrap.remove(); res(); }, ms);
   });
-
-  // Caso detection
-  const cli  = state.cliente;
-  const mats = state.materiales;
-  if (cli === 'Negocio' && (mats === 'Negocio' || mats === 'No hubo')) state.caso = 1;
-  else if (cli === 'Negocio' && mats === 'Colaborador') state.caso = 2;
-  else if (cli === 'Colaborador' && (mats === 'Negocio' || mats === 'No hubo')) state.caso = 3;
-  else state.caso = 4;
-
-  const pcts = { 1: .40, 2: .50, 3: .55, 4: .65 };
-  state.pctColabo = pcts[state.caso];
-
-  // Maths
-  const cobro    = state.cobro;
-  const totalDed = state.mat.monto + state.trans.monto + state.otro.monto;
-  const base     = Math.max(0, cobro - totalDed);
-  const splitCol = Math.round(base * state.pctColabo * 100) / 100;
-  const splitNeg = Math.round(base * (1 - state.pctColabo) * 100) / 100;
-
-  // Recovery
-  const recCol = (state.mat.yn==='si'&&state.mat.quien==='Colaborador'?state.mat.monto:0)
-               + (state.trans.yn==='si'&&state.trans.quien==='Colaborador'?state.trans.monto:0)
-               + (state.otro.yn==='si'&&state.otro.quien==='Colaborador'?state.otro.monto:0);
-  const recNeg = (state.mat.yn==='si'&&state.mat.quien==='Negocio'?state.mat.monto:0)
-               + (state.trans.yn==='si'&&state.trans.quien==='Negocio'?state.trans.monto:0)
-               + (state.otro.yn==='si'&&state.otro.quien==='Negocio'?state.otro.monto:0);
-
-  const totalCol = Math.round((splitCol + recCol) * 100) / 100;
-  const totalNeg = Math.round((splitNeg + recNeg) * 100) / 100;
-
-  // Descriptions
-  const casoDesc = [
-    '',
-    'Negocio aportó todo: cliente, herramientas y materiales. El colaborador ejecutó.',
-    'Colaborador puso los materiales de su bolsillo. Negocio aportó cliente y herramientas.',
-    'Colaborador consiguió el cliente. Negocio aportó herramientas y materiales.',
-    'Colaborador lo hizo casi todo: trajo el cliente, puso materiales y ejecutó.'
-  ];
-
-  const $f = n => '$' + n.toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2});
-
-  // ── RENDER ──
-  document.getElementById('resCaso').textContent  = 'Caso ' + state.caso;
-  document.getElementById('resUnidad').textContent = state.unidad;
-  document.getElementById('resDesc').textContent   = state.descripcion;
-  document.getElementById('resDescCaso').textContent = casoDesc[state.caso];
-
-  document.getElementById('resTotalColabo').textContent = $f(totalCol);
-  document.getElementById('resTotalNegocio').textContent = $f(totalNeg);
-  document.getElementById('resSubColabo').textContent = `${Math.round(state.pctColabo*100)}% del split (${$f(splitCol)})${recCol > 0 ? ' + recupera '+$f(recCol) : ''}`;
-  document.getElementById('resSubNegocio').textContent = `${Math.round((1-state.pctColabo)*100)}% del split (${$f(splitNeg)})${recNeg > 0 ? ' + recupera '+$f(recNeg) : ''}`;
-
-  // Breakdown detail
-  let breakCol = `• Del split: ${$f(splitCol)}`;
-  if (state.mat.yn==='si'&&state.mat.quien==='Colaborador') breakCol += `\n• Recupera materiales: ${$f(state.mat.monto)}`;
-  if (state.trans.yn==='si'&&state.trans.quien==='Colaborador') breakCol += `\n• Recupera transporte: ${$f(state.trans.monto)}`;
-  if (state.otro.yn==='si'&&state.otro.quien==='Colaborador') breakCol += `\n• Recupera otro gasto: ${$f(state.otro.monto)}`;
-  document.getElementById('resBreakColabo').style.whiteSpace = 'pre-line';
-  document.getElementById('resBreakColabo').textContent = breakCol;
-
-  let breakNeg = `• Del split: ${$f(splitNeg)}`;
-  if (state.mat.yn==='si'&&state.mat.quien==='Negocio') breakNeg += `\n• Recupera materiales: ${$f(state.mat.monto)}`;
-  if (state.trans.yn==='si'&&state.trans.quien==='Negocio') breakNeg += `\n• Recupera transporte: ${$f(state.trans.monto)}`;
-  if (state.otro.yn==='si'&&state.otro.quien==='Negocio') breakNeg += `\n• Recupera otro gasto: ${$f(state.otro.monto)}`;
-  document.getElementById('resBreakNegocio').style.whiteSpace = 'pre-line';
-  document.getElementById('resBreakNegocio').textContent = breakNeg;
-
-  document.getElementById('resCobro').textContent  = $f(cobro);
-  document.getElementById('resDeduc').textContent  = totalDed > 0 ? '-' + $f(totalDed) : '-$0.00';
-  document.getElementById('resBase').textContent   = $f(base);
-  document.getElementById('resPctColabo').textContent = Math.round(state.pctColabo*100) + '%';
-  document.getElementById('resPctNegocio').textContent = Math.round((1-state.pctColabo)*100) + '%';
-
-  const suma = totalCol + totalNeg;
-  const ok = Math.abs(suma - cobro) < 0.02;
-  document.getElementById('verifyChip').innerHTML = ok
-    ? '<span class="verify-chip verify-ok">✓ La suma cuadra con el cobro total</span>'
-    : '<span class="verify-chip verify-err">⚠ Revisar — la suma no coincide</span>';
-
-  // Store for WhatsApp
-  state._result = { cobro, totalDed, base, totalCol, totalNeg, splitCol, splitNeg, recCol, recNeg, $f };
-
-  goTo(4);
 }
 
-// ── SHARE ──
-function compartirWhatsApp() {
-  const r = state._result;
-  if (!r) return;
-  const pctC = Math.round(state.pctColabo * 100);
-  const pctN = 100 - pctC;
-  const lines = [
-    `🧮 *Cálculo de tarifa — ${state.unidad}*`,
-    `📋 ${state.descripcion}`,
-    ``,
-    `💰 Cobro al cliente: ${r.$f(r.cobro)}`,
-    r.totalDed > 0 ? `💸 Deducciones: -${r.$f(r.totalDed)}` : null,
-    `📊 Base neta: ${r.$f(r.base)}`,
-    ``,
-    `⚡ *${['','Caso 1','Caso 2','Caso 3','Caso 4'][state.caso]}* (${pctC}% / ${pctN}%)`,
-    ``,
-    `👤 *Colaborador recibe: ${r.$f(r.totalCol)}*`,
-    `  • Del split (${pctC}%): ${r.$f(r.splitCol)}`,
-    r.recCol > 0 ? `  • Recupera gastos: ${r.$f(r.recCol)}` : null,
-    ``,
-    `🏢 *Negocio recibe: ${r.$f(r.totalNeg)}*`,
-    `  • Del split (${pctN}%): ${r.$f(r.splitNeg)}`,
-    r.recNeg > 0 ? `  • Recupera gastos: ${r.$f(r.recNeg)}` : null,
-    ``,
-    `_Calculado con Calculadora SotaVentoX_`
-  ].filter(l => l !== null).join('\n');
-
-  const url = 'https://wa.me/?text=' + encodeURIComponent(lines);
-  window.open(url, '_blank');
+function setReplies(btns){
+  const r = document.getElementById('replies');
+  r.innerHTML = '';
+  btns.forEach(b=>{
+    const btn = document.createElement('button');
+    btn.className = 'reply-btn ' + (b.cls||'');
+    btn.textContent = b.label;
+    btn.onclick = () => handleReply(b.action, b.label);
+    r.appendChild(btn);
+  });
 }
 
-// ── RESET ──
-function reiniciar() {
-  location.reload();
+function scrollDown(){ const c=document.getElementById('chat'); c.scrollTop=c.scrollHeight; }
+
+// ════════════════════════════════════════════
+// FLOWS
+// ════════════════════════════════════════════
+async function handleReply(action, label){
+  setReplies([]); // clear buttons
+  addBubble(label, true);
+  await showTyping(900);
+  await routes[action]();
 }
+
+function sendTyped(){
+  const inp = document.getElementById('userInput');
+  const val = inp.value.trim();
+  if(!val) return;
+  inp.value = '';
+  addBubble(val, true);
+  showTyping(800).then(()=>{ routes['default'](); });
+}
+
+// ── ROUTE MAP ────────────────────────────────
+const routes = {
+
+  // ── BIENVENIDA ──────────────────────────────
+  async start(){
+    setAgent('ehek');
+    addDateChip('Hoy');
+    await showTyping(1200);
+    addBubble('¡Hola! 🌀 Soy <b>Ehek</b>, el asistente de <b>Grupo SotaVentoX</b>.<br><br>Mi nombre viene de <i>Ehecatl</i>, el dios del viento en la cultura náhuatl del Sotavento. Estoy aquí para guiarte. 🌬️');
+    await showTyping(800);
+    addBubble('¿Con cuál de nuestras unidades puedo ayudarte hoy?');
+    setReplies([
+      { label:'📷 ConectaX — Cámaras y seguridad', action:'goConectaX', cls:'accent' },
+      { label:'🌿 VerdeX — Jardines y espacios', action:'goVerdeX', cls:'accent-green' },
+      { label:'👤 Hablar con un asesor', action:'goAsesor' },
+      { label:'📋 ¿Qué es SotaVentoX?', action:'sobreGSX' },
+    ]);
+  },
+
+  async sobreGSX(){
+    addCard(`<h3>🌬️ Grupo SotaVentoX</h3>
+Como el viento del Sotavento, estamos en todos lados — protegiendo y cuidando tu espacio.
+<div class="tag">📷 ConectaX</div><div class="tag">🌿 VerdeX</div>
+<div style="margin-top:10px;font-size:12px;opacity:.85">Dos unidades, un mismo compromiso: tu tranquilidad.</div>`);
+    await showTyping(600);
+    addBubble('¿Por cuál unidad quieres continuar?');
+    setReplies([
+      { label:'📷 ConectaX', action:'goConectaX', cls:'accent' },
+      { label:'🌿 VerdeX', action:'goVerdeX', cls:'accent-green' },
+      { label:'👤 Asesor humano', action:'goAsesor' },
+    ]);
+  },
+
+  // ── CONECTAX ────────────────────────────────
+  async goConectaX(){
+    setAgent('hal');
+    await showTyping(1000);
+    addBubble('¡Buenas! 🦅 Soy <b>HAL</b>, asesor de <b>ConectaX</b>.<br>Me especializo en cámaras, videovigilancia y sistemas de seguridad.');
+    await showTyping(700);
+    addBubble('¿Qué necesitas?');
+    setReplies([
+      { label:'📋 Ver servicios y precios', action:'cxServicios', cls:'accent' },
+      { label:'📅 Agendar visita técnica', action:'cxAgendar', cls:'accent' },
+      { label:'🔧 Soporte técnico', action:'cxSoporte' },
+      { label:'💬 Hablar con asesor', action:'goAsesor' },
+      { label:'🔙 Volver al inicio', action:'start' },
+    ]);
+  },
+
+  async cxServicios(){
+    addCard(`<h3>📷 Servicios ConectaX</h3>
+<div class="svc-list">
+  <div class="svc-item"><span>🔍 Diagnóstico / visita técnica</span><span class="svc-price">$300</span></div>
+  <div class="svc-item"><span>📷 Instalación cámara c/material</span><span class="svc-price">$1,800–$2,400</span></div>
+  <div class="svc-item"><span>📷 Instalación cámara s/material</span><span class="svc-price">$500</span></div>
+  <div class="svc-item"><span>🔧 Correctivo (hasta 2 cámaras)</span><span class="svc-price">$400–$600</span></div>
+  <div class="svc-item"><span>🛡️ Mantenimiento preventivo</span><span class="svc-price">$700</span></div>
+  <div class="svc-item"><span>📡 Kit 4 cámaras completo</span><span class="svc-price">$8,500</span></div>
+</div>`);
+    await showTyping(600);
+    addBubble('¿Te gustaría agendar una visita sin costo para revisar tu espacio y darte un presupuesto exacto?');
+    setReplies([
+      { label:'✅ Sí, agendar visita', action:'cxAgendar', cls:'accent' },
+      { label:'💬 Quiero más info', action:'cxMasInfo' },
+      { label:'👤 Hablar con HAL humano', action:'goAsesor' },
+      { label:'🔙 Menú ConectaX', action:'goConectaX' },
+    ]);
+  },
+
+  async cxMasInfo(){
+    await showTyping(700);
+    addBubble('Claro, cuéntame: ¿es para casa, negocio o bodega? ¿Ya tienes cámaras instaladas o es instalación nueva?');
+    setReplies([
+      { label:'🏠 Casa', action:'cxCasa' },
+      { label:'🏢 Negocio / local', action:'cxNegocio' },
+      { label:'🏭 Bodega / empresa', action:'cxBodega' },
+      { label:'🔙 Regresar', action:'cxServicios' },
+    ]);
+  },
+
+  async cxCasa(){
+    await showTyping(800);
+    addBubble('Para una casa lo más común es un kit de <b>2 a 4 cámaras</b> con DVR incluido. Te cubre entradas, cochera y patio.<br><br>Inversión aproximada: <b>$5,000 – $10,000</b> según calidad y metraje a cubrir. 📹');
+    setReplies([
+      { label:'📅 Agendar visita gratis', action:'cxAgendar', cls:'accent' },
+      { label:'📷 Ver servicios', action:'cxServicios' },
+      { label:'🔙 Regresar', action:'goConectaX' },
+    ]);
+  },
+
+  async cxNegocio(){
+    await showTyping(800);
+    addBubble('Para negocios recomendamos cámaras con <b>visión nocturna HD</b> y acceso remoto desde tu celular. Muy útil para monitoreo en tiempo real. 🏪<br><br>Inversión: <b>$8,500 – $18,000</b> según área y cantidad.');
+    setReplies([
+      { label:'📅 Agendar visita', action:'cxAgendar', cls:'accent' },
+      { label:'📷 Ver precios exactos', action:'cxServicios' },
+      { label:'🔙 Regresar', action:'goConectaX' },
+    ]);
+  },
+
+  async cxBodega(){
+    await showTyping(800);
+    addBubble('Para bodegas y empresas manejamos sistemas más robustos: NVR, cámaras IP de largo alcance y grabación en la nube. 🏭<br><br>Soluciones desde <b>$15,000</b>. Te damos cotización personalizada sin compromiso.');
+    setReplies([
+      { label:'📅 Agendar visita', action:'cxAgendar', cls:'accent' },
+      { label:'👤 Hablar con asesor', action:'goAsesor' },
+      { label:'🔙 Regresar', action:'goConectaX' },
+    ]);
+  },
+
+  async cxAgendar(){
+    await showTyping(700);
+    addBubble('⑑Perfecto! Para agendar tu visita técnica (sin costo) necesito algunos datos. ¿Puedes decirme tu nombre?');
+    ctx.step = 'cxNombre';
+    setReplies([]);
+  },
+
+  async cxSoporte(){
+    await showTyping(700);
+    addBubble('Entendido, soporte técnico. 🔧 ¿Cuál es el problema que presentas?');
+    setReplies([
+      { label:'📷 Cámara sin imagen', action:'cxSinImagen' },
+      { label:'🌙 Sin visión nocturna', action:'cxNoche' },
+      { label:'💱 No veo desde mi celular', action:'cxCelular' },
+      { label:'⚡ No enciende el equipo', action:'cxNoEnciende' },
+      { label:'👤 Hablar con técnico', action:'goAsesor' },
+    ]);
+  },
+
+  async cxSinImagen(){
+    await showTyping(900);
+    addBubble('Ese problema generalmente es por: <br>1️⃣ Cable desconectado o dañado<br>2️⃣ Cámara sin corriente<br>3️⃣ Puerto del DVR/NVR saturado<br><br>¿El problema es en <b>todas</b> las cámaras o solo una?');
+    setReplies([
+      { label:'Solo una cámara', action:'cxSoloUna' },
+      { label:'Varias / todas', action:'cxVarias' },
+      { label:'👤 Necesito técnico', action:'goAsesor' },
+    ]);
+  },
+
+  async cxSoloUna(){
+    await showTyping(700);
+    addBubble('Si es solo una, prueba esto: <br>✅ Revisa que el cable BNC/IP esté bien conectado en la parte trasera del DVR<br>✅ Verifica que la cámara tenga corriente (led encendido)<br>✅ Reinicia el canal en el DVR<br><br>Si el problema persiste, agenda un correctivo. Costo: <b>$400 –$600</b>');
+    setReplies([
+      { label:'📅 Agendar correctivo', action:'cxAgendar', cls:'accent' },
+      { label:'✅ Ya funcionó, gracias', action:'resuelto' },
+      { label:'🔙 Más problemas', action:'cxMasProblemas' },
+    ]);
+  },
+
+  async cxVarias(){
+    await showTyping(700);
+    addBubble('Si son varias cámaras lo más probable es el <b>DVR/NVR</b> o la fuente de poder. <br><br>Recomendamos una revisión técnica. ¿Agendamos?');
+    setReplies([
+      { label:'📅 Sí, agendar revisión', action:'cxAgendar', cls:'accent' },
+      { label:'👤 Hablar con técnico', action:'goAsesor' },
+    ]);
+  },
+
+  async cxNoche(){
+    await showTyping(700);
+    addBubble('Para la visión nocturna: <br>✅ Verifica que haya poca luz (las IR se activan en oscuridad)<br>✅ Limpia el lente con un paño seco<br>✅ Revisa la configuración de modo día/noche en el DVR<br><br>¿Solucionó?');
+    setReplies([
+      { label:'✅ Sí, gracias', action:'resuelto' },
+      { label:'❌ No, necesito técnico', action:'goAsesor' },
+    ]);
+  },
+
+  async cxCelular(){
+    await showTyping(800);
+    addBubble('Para ver desde tu celular necesitas: <br>1️⃣ App instalada (DMSS, gDMSS o XMEye)<br>2️⃣ DVR conectado a internet (cable o wifi)<br>3️⃣ Configurar el P2P o IP pública<br><br>¿Tienes la app instalada?');
+    setReplies([
+      { label:'✅ Sí tengo la app', action:'cxConApp' },
+      { label:'⍌ No sé cuál instalar', action:'cxMasInfo' },
+      { label:'👤 Que me apoye un técnico', action:'goAsesor' },
+    ]);
+  },
+
+  async cxConApp(){
+    await showTyping(700);
+    addBubble('Bien. El paso siguiente es verificar el <b>número de serie (S/N)</b> del DVR y escanearlo en la app para agregar el dispositivo vía P2P. ¿Necesitas que un técnico te guíe por videollamada?');
+    setReplies([
+      { label:'📞 Sí, guíame', action:'goAsesor', cls:'accent' },
+      { label:'✅ Ya lo resolvió', action:'resuelto' },
+    ]);
+  },
+
+  async cxSinApp(){ await showTyping(700); addBubble('Para Dahua descarga <b>DMSS</b> y para Hikvision <b>Hik-Connect</b>. Si es marca genérica prueba con <b>XMEye</b>. ¿Sabes la marca de tu equipo?');
+    setReplies([{ label:'📞 Prefiero que me apoyen', action:'goAsesor', cls:'accent' },{ label:'✅ Ya tengo la app', action:'cxConApp' }]);
+  },
+
+  async cxNoEnciende(){
+    await showTyping(700);
+    addBubble('Si no enciende el DVR/cámara: <br>✅ Verifica que el cable de corriente esté bien conectado<br>✅ Prueba otro contacto de luz<br>✅ Revisa si el led del adaptador enciende<br><br>Si nada funciona, puede ser la fuente dañada. Llevamos refacciones.');
+    setReplies([
+      { label:'📅 Agendar revisión', action:'cxAgendar', cls:'accent' },
+      { label:'✅ Funcionó', action:'resuelto' },
+    ]);
+  },
+
+  // ── VERDEX ──────────────────────────────────
+  async goVerdeX(){
+    setAgent('koli');
+    await showTyping(1000);
+    addBubble('¡Hola! 🐦 Soy <b>Koli</b>, asesora de <b>VerdeX</b>.<br>Me encargo de jardines, plantas y espacios verdes. ¡Hagamos crecer tu espacio! 🌱');
+    await showTyping(700);
+    addBubble('¿Qué puedo hacer por ti?');
+    setReplies([
+      { label:'🌿 Ver propuestas y precios', action:'vxPropuestas', cls:'accent-green' },
+      { label:'📅 Agendar visita de diagnóstico', action:'vxAgendar', cls:'accent-green' },
+      { label:'🔧 Mantenimiento / soporte', action:'vxMantenimiento' },
+      { label:'💬 Hablar con asesor', action:'goAsesor' },
+      { label:'🔙 Volver al inicio', action:'start' },
+    ]);
+  },
+
+  async vxPropuestas(){
+    addCard(`<h3>🌿 Propuestas VerdeX</h3>
+<div class="svc-list">
+  <div class="svc-item"><span>🌱 Propuesta Básica (hasta 10m²)</span><span class="svc-price">$2,310</span></div>
+  <div class="svc-item"><span>🌿 Propuesta Intermedia (10–25m²)</span><span class="svc-price">$4,710</span></div>
+  <div class="svc-item"><span>🌳 Propuesta Premium (jardín completo)</span><span class="svc-price">$7,310</span></div>
+  <div class="svc-item"><span>✂️ Poda de árbol pequeño</span><span class="svc-price">$400</span></div>
+  <div class="svc-item"><span>🌾 Corte de pasto + fertilización</span><span class="svc-price">$500</span></div>
+  <div class="svc-item"><span>🛤️ Caminito de grava (m²)</span><span class="svc-price">$280/m²</span></div>
+</div>`, true);
+    await showTyping(600);
+    addBubble('Todas las propuestas incluyen materiales, plantas y mano de obra. ¿Te agendo una visita de diagnóstico sin costo?');
+    setReplies([
+      { label:'✅ Sí, agendar visita', action:'vxAgendar', cls:'accent-green' },
+      { label:'🌱 Básica — cuéntame más', action:'vxBasica' },
+      { label:'🌿 Intermedia — más detalles', action:'vxIntermedia' },
+      { label:'🌳 Premium — más detalles', action:'vxPremium' },
+      { label:'🔙 Menú VerdeX', action:'goVerdeX' },
+    ]);
+  },
+
+  async vxBasica(){
+    await showTyping(700);
+    addCard(`<h3>🌱 Propuesta Básica · $2,310</h3>
+Ideal para jardines pequeños o unidad VerdeX (2.5×4m aprox.)
+<br><br>
+✅ Plantas de temporada (jazmín, bougainvillea, helechos)<br>
+✅ Tierra preparada y abono<br>
+✅ Bordeo y diseño básico<br>
+✅ Caminito de grava opcional<br>
+✅ Limpieza total del área`, true);
+    setReplies([
+      { label:'📅 Quiero esta propuesta', action:'vxAgendar', cls:'accent-green' },
+      { label:'🔙 Ver todas las propuestas', action:'vxPropuestas' },
+    ]);
+  },
+
+  async vxIntermedia(){
+    await showTyping(700);
+    addCard(`<h3>🌿 Propuesta Intermedia · $4,710</h3>
+Para jardines medianos con más variedad y detalle.
+<br><br>
+✅ Todo lo de Básica +<br>
+✅ Árbol ornamental o frutal<br>
+✅ Plantas de sombra y sol<br>
+✅ Piedra de río decorativa<br>
+✅ Fertilización y control de plagas<br>
+✅ Caminito de laja incluido`, true);
+    setReplies([
+      { label:'📅 Quiero esta propuesta', action:'vxAgendar', cls:'accent-green' },
+      { label:'🔙 Ver todas las propuestas', action:'vxPropuestas' },
+    ]);
+  },
+
+  async vxPremium(){
+    await showTyping(700);
+    addCard(`<h3>🌳 Propuesta Premium · $7,310</h3>
+Transformación completa de tu espacio verde.
+<br><br>
+✅ Todo lo de Intermedia +<br>
+✅ Árboles de ornato seleccionados<br>
+✅ Sistema de riego básico<br>
+✅ Diseño paisajístico personalizado<br>
+✅ Canto rodado + laja premium<br>
+✅ Mantenimiento del primer mes incluido`, true);
+    setReplies([
+      { label:'📅 Quiero esta propuesta', action:'vxAgendar', cls:'accent-green' },
+      { label:'🔙 Ver todas las propuestas', action:'vxPropuestas' },
+    ]);
+  },
+
+  async vxAgendar(){
+    await showTyping(700);
+    addBubble('¡Excelente elección! 🌱 La visita de diagnóstico es <b>sin costo</b>. Solo necesito tu nombre para coordinar. ¿Cómo te llamas?');
+    ctx.step = 'vxNombre';
+    setReplies([]);
+  },
+
+  async vxMantenimiento(){
+    await showTyping(700);
+    addBubble('Para mantenimiento de jardín tenemos dos modalidades: 🌿');
+    addCard(`<h3>🔧 Mantenimiento VerdeX</h3>
+<div class="svc-list">
+  <div class="svc-item"><span>🌾 Visita única de mantenimiento</span><span class="svc-price">$500–$800</span></div>
+  <div class="svc-item"><span>📅 Plan mensual preventivo</span><span class="svc-price">$800/mes</span></div>
+  <div class="svc-item"><span>✂️ Poda árbol pequeño</span><span class="svc-price">$400</span></div>
+  <div class="svc-item"><span>🌳 Poda árbol mediano</span><span class="svc-price">$700</span></div>
+  <div class="svc-item"><span>🌲 Poda árbol grande</span><span class="svc-price">$1,200</span></div>
+</div>`, true);
+    setReplies([
+      { label:'📅 Agendar mantenimiento', action:'vxAgendar', cls:'accent-green' },
+      { label:'💬 Hablar con Koli humana', action:'goAsesor' },
+      { label:'🔙 Menú VerdeX', action:'goVerdeX' },
+    ]);
+  },
+
+  // ── ASESOR ──────────────────────────────────
+  async goAsesor(){
+    setAgent('ehek');
+    await showTyping(800);
+    addBubble('¡Claro! Te conecto con un asesor humano de Grupo SotaVentoX. 🤝');
+    await showTyping(600);
+    addCard(`<h3>🧑 Contacto directo</h3>
+Toca el botón para abrir WhatsApp con nuestro asesor. Tiempo de respuesta: <b>menos de 1 hora</b> en horario laboral.
+<br><br>
+🕐 Horario: Lun–Vie 9am–7pm · Sáb 9am–2pm`);
+    setReplies([
+      { label:'💬 Abrir WhatsApp con asesor', action:'abrirWA', cls:'wa' },
+      { label:'🔙 Regresar al inicio', action:'start' },
+    ]);
+  },
+
+  async abrirWA(){
+    const msg = encodeURIComponent('Hola, vengo del chatbot de SotaVentoX y necesito atención personalizada.');
+    window.open('https://wa.me/5212296555076?text=' + msg, '_blank');
+    await showTyping(500);
+    addBubble('¡Abriendo WhatsApp! 📱 Si no se abre automáticamente, guarda el número: <b>229 655 5076</b>');
+    setReplies([{ label:'🔙 Volver al inicio', action:'start' }]);
+  },
+
+  // ── HELPERS ─────────────────────────────────
+  async resuelto(){
+    await showTyping(500);
+    addBubble('¡Qué gusto que se haya resuelto! 🎉 Recuerda que para mantenimientos preventivos y evitar futuros problemas, te recomendamos nuestro plan mensual.');
+    setReplies([
+      { label:'📋 Ver plan preventivo', action:'cxServicios' },
+      { label:'🏠 Volver al inicio', action:'start' },
+    ]);
+  },
+
+  async default(){
+    await showTyping(700);
+    addBubble('Entendido. ¿Prefiero asegurarte una respuesta precisa — con cuál de estos temas te puedo ayudar?');
+    setReplies([
+      { label:'📷 ConectaX — Cámaras', action:'goConectaX', cls:'accent' },
+      { label:'🌿 VerdeX — Jardines', action:'goVerdeX', cls:'accent-green' },
+      { label:'👤 Asesor humano', action:'goAsesor' },
+    ]);
+  },
+};
+
+// ════════════════════════════════════════════
+// STEP HANDLING (for name/text collection)
+// ════════════════════════════════════════════
+const origSendTyped = sendTyped;
+window.sendTyped = function(){
+  const inp = document.getElementById('userInput');
+  const val = inp.value.trim();
+  if(!val) return;
+
+  if(ctx.step === 'cxNombre'){
+    inp.value = '';
+    ctx.nombre = val;
+    addBubble(val, true);
+    ctx.step = '';
+    showTyping(800).then(async ()=>{
+      addBubble(`Perfecto, <b>${val}</b>! 👋 ¿Cuál es el mejor número para confirmarte la visita?`);
+      ctx.step = 'cxTelefono';
+    });
+    return;
+  }
+  if(ctx.step === 'cxTelefono'){
+    inp.value = '';
+    addBubble(val, true);
+    ctx.step = '';
+    showTyping(900).then(async ()=>{
+      addBubble(`¡Listo! ✅ <b>${ctx.nombre}</b>, tu visita técnica de ConectaX quedó agendada. Un asesor de HAL te contactará al <b>${val}</b> para confirmar fecha y hora.<br><br>Horario disponible: <b>Lun–Vie 9am–6pm</b>`);
+      setReplies([
+        { label:'💬 Abrir WhatsApp', action:'abrirWA', cls:'wa' },
+        { label:'🏠 Volver al inicio', action:'start' },
+      ]);
+    });
+    return;
+  }
+  if(ctx.step === 'vxNombre'){
+    inp.value = '';
+    ctx.nombre = val;
+    addBubble(val, true);
+    ctx.step = '';
+    showTyping(800).then(async ()=>{
+      addBubble(`¡Hola <b>${val}</b>! 🌿 ¿Cuál es tu número de WhatsApp para coordinar la visita?`);
+      ctx.step = 'vxTelefono';
+    });
+    return;
+  }
+  if(ctx.step === 'vxTelefono'){
+    inp.value = '';
+    addBubble(val, true);
+    ctx.step = '';
+    showTyping(900).then(async ()=>{
+      addBubble(`¡Excelente! 🌱 <b>${ctx.nombre}</b>, tu visita de diagnóstico VerdeX está confirmada. Koli te contactará al <b>${val}</b> para agendar el día.<br><br>🌿 ¡Pronto tu espacio va a florecer!`);
+      setReplies([
+        { label:'💬 Abrir WhatsApp', action:'abrirWA', cls:'wa' },
+        { label:'🏠 Volver al inicio', action:'start' },
+      ]);
+    });
+    return;
+  }
+
+  // Default
+  inp.value = '';
+  addBubble(val, true);
+  showTyping(700).then(()=>{ routes['default'](); });
+};
+
+// ════════════════════════════════════════════
+// BOOT
+// ════════════════════════════════════════════
+setTimeout(()=>{ routes.start(); }, 600);
+</script>
+</div>
+<script>
+let _chatBooted=false;
+function toggleChat(){
+  const fab=document.getElementById('chatFab');
+  const panel=document.getElementById('chatPanel');
+  const isOpen=panel.classList.contains('open');
+  if(isOpen){panel.classList.remove('open');fab.classList.remove('open');}
+  else{panel.classList.add('open');fab.classList.add('open');
+    if(!_chatBooted){_chatBooted=true;setTimeout(()=>{routes.start();},300);}
+  }
+}
+
+// ════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════
+let ctx = { agent: 'ehek', step: 'start', nombre: '', servicio: '' };
+
+const AGENTS = {
+  ehek: { name:'EHEK · SotaVentoX', status:'En línea · Asistente principal', emoji:'🌀', cls:'avatar-ehek', badge:'🤖 Bot', nameColor:'' },
+  hal:  { name:'HAL · ConectaX',    status:'En línea · Asesor de seguridad', emoji:'🦅', cls:'avatar-hal',  badge:'📷 ConectaX', nameColor:'' },
+  koli: { name:'KOLI · VerdeX',     status:'En línea · Asesor de jardines',  emoji:'🐦', cls:'avatar-koli', badge:'🌿 VerdeX', nameColor:'koli' }
+};
+
+const now = () => { const d=new Date(); return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0'); };
+
+// ════════════════════════════════════════════
+// RENDER
+// ════════════════════════════════════════════
+function setAgent(id){
+  ctx.agent = id;
+  const a = AGENTS[id];
+  document.getElementById('headerAvatar').className = 'avatar ' + a.cls;
+  document.getElementById('headerAvatar').textContent = a.emoji;
+  document.getElementById('headerName').textContent = a.name;
+  document.getElementById('headerStatus').textContent = a.status;
+  document.getElementById('headerBadge').textContent = a.badge;
+}
+
+function addDateChip(txt){
+  const chat = document.getElementById('chat');
+  const d = document.createElement('div');
+  d.className = 'date-chip';
+  d.innerHTML = `<span>${txt}</span>`;
+  chat.appendChild(d);
+}
+
+function addBubble(text, isUser=false, agentId=null){
+  const chat = document.getElementById('chat');
+  const a = AGENTS[agentId || ctx.agent];
+  const wrap = document.createElement('div');
+  wrap.className = 'bubble-wrap ' + (isUser ? 'user' : 'bot');
+
+  if(!isUser){
+    const av = document.createElement('div');
+    av.className = 'bubble-avatar ' + a.cls;
+    av.textContent = a.emoji;
+    wrap.appendChild(av);
+  }
+
+  const inner = document.createElement('div');
+  inner.style.maxWidth = '100%';
+
+  if(!isUser){
+    const name = document.createElement('div');
+    name.className = 'bubble-name ' + (a.nameColor||'');
+    name.textContent = a.name;
+    inner.appendChild(name);
+  }
+
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble ' + (isUser ? 'user' : 'bot');
+  bubble.innerHTML = text;
+  inner.appendChild(bubble);
+
+  const time = document.createElement('div');
+  time.className = 'bubble-time';
+  time.textContent = now() + (isUser ? ' ✓✓' : '');
+  inner.appendChild(time);
+
+  wrap.appendChild(inner);
+  chat.appendChild(wrap);
+  scrollDown();
+}
+
+function addCard(html, green=false){
+  const chat = document.getElementById('chat');
+  const a = AGENTS[ctx.agent];
+  const wrap = document.createElement('div');
+  wrap.className = 'bubble-wrap bot';
+
+  const av = document.createElement('div');
+  av.className = 'bubble-avatar ' + a.cls;
+  av.textContent = a.emoji;
+  wrap.appendChild(av);
+
+  const inner = document.createElement('div');
+  inner.style.maxWidth = '82%';
+  const card = document.createElement('div');
+  card.className = 'hero-card' + (green ? ' green' : '');
+  card.innerHTML = html;
+  inner.appendChild(card);
+
+  const time = document.createElement('div');
+  time.className = 'bubble-time';
+  time.textContent = now();
+  inner.appendChild(time);
+
+  wrap.appendChild(inner);
+  chat.appendChild(wrap);
+  scrollDown();
+}
+
+function showTyping(ms=1100){
+  return new Promise(res=>{
+    const chat = document.getElementById('chat');
+    const a = AGENTS[ctx.agent];
+    const wrap = document.createElement('div');
+    wrap.className = 'bubble-wrap bot';
+    wrap.id = 'typing-indicator';
+    const av = document.createElement('div');
+    av.className = 'bubble-avatar ' + a.cls;
+    av.textContent = a.emoji;
+    wrap.appendChild(av);
+    const t = document.createElement('div');
+    t.className = 'typing';
+    t.innerHTML = '<span></span><span></span><span></span>';
+    wrap.appendChild(t);
+    chat.appendChild(wrap);
+    scrollDown();
+    setTimeout(()=>{ wrap.remove(); res(); }, ms);
+  });
+}
+
+function setReplies(btns){
+  const r = document.getElementById('replies');
+  r.innerHTML = '';
+  btns.forEach(b=>{
+    const btn = document.createElement('button');
+    btn.className = 'reply-btn ' + (b.cls||'');
+    btn.textContent = b.label;
+    btn.onclick = () => handleReply(b.action, b.label);
+    r.appendChild(btn);
+  });
+}
+
+function scrollDown(){ const c=document.getElementById('chat'); c.scrollTop=c.scrollHeight; }
+
+// ════════════════════════════════════════════
+// FLOWS
+// ════════════════════════════════════════════
+async function handleReply(action, label){
+  setReplies([]); // clear buttons
+  addBubble(label, true);
+  await showTyping(900);
+  await routes[action]();
+}
+
+function sendTyped(){
+  const inp = document.getElementById('userInput');
+  const val = inp.value.trim();
+  if(!val) return;
+  inp.value = '';
+  addBubble(val, true);
+  showTyping(800).then(()=>{ routes['default'](); });
+}
+
+// ── ROUTE MAP ────────────────────────────────
+const routes = {
+
+  // ── BIENVENIDA ──────────────────────────────
+  async start(){
+    setAgent('ehek');
+    addDateChip('Hoy');
+    await showTyping(1200);
+    addBubble('¡Hola! 🌀 Soy <b>Ehek</b>, el asistente de <b>Grupo SotaVentoX</b>.<br><br>Mi nombre viene de <i>Ehecatl</i>, el dios del viento en la cultura náhuatl del Sotavento. Estoy aquí para guiarte. 🌬️');
+    await showTyping(800);
+    addBubble('¿Con cuál de nuestras unidades puedo ayudarte hoy?');
+    setReplies([
+      { label:'📷 ConectaX — Cámaras y seguridad', action:'goConectaX', cls:'accent' },
+      { label:'🌿 VerdeX — Jardines y espacios', action:'goVerdeX', cls:'accent-green' },
+      { label:'👤 Hablar con un asesor', action:'goAsesor' },
+      { label:'📋 ¿Qué es SotaVentoX?', action:'sobreGSX' },
+    ]);
+  },
+
+  async sobreGSX(){
+    addCard(`<h3>🌬️ Grupo SotaVentoX</h3>
+Como el viento del Sotavento, estamos en todos lados — protegiendo y cuidando tu espacio.
+<div class="tag">📷 ConectaX</div><div class="tag">🌿 VerdeX</div>
+<div style="margin-top:10px;font-size:12px;opacity:.85">Dos unidades, un mismo compromiso: tu tranquilidad.</div>`);
+    await showTyping(600);
+    addBubble('¿Por cuál unidad quieres continuar?');
+    setReplies([
+      { label:'📷 ConectaX', action:'goConectaX', cls:'accent' },
+      { label:'🌿 VerdeX', action:'goVerdeX', cls:'accent-green' },
+      { label:'👤 Asesor humano', action:'goAsesor' },
+    ]);
+  },
+
+  // ── CONECTAX ────────────────────────────────
+  async goConectaX(){
+    setAgent('hal');
+    await showTyping(1000);
+    addBubble('¡Buenas! 🦅 Soy <b>HAL</b>, asesor de <b>ConectaX</b>.<br>Me especializo en cámaras, videovigilancia y sistemas de seguridad.');
+    await showTyping(700);
+    addBubble('¿Qué necesitas?');
+    setReplies([
+      { label:'📋 Ver servicios y precios', action:'cxServicios', cls:'accent' },
+      { label:'📅 Agendar visita técnica', action:'cxAgendar', cls:'accent' },
+      { label:'🔧 Soporte técnico', action:'cxSoporte' },
+      { label:'💬 Hablar con asesor', action:'goAsesor' },
+      { label:'🔙 Volver al inicio', action:'start' },
+    ]);
+  },
+
+  async cxServicios(){
+    addCard(`<h3>📷 Servicios ConectaX</h3>
+<div class="svc-list">
+  <div class="svc-item"><span>🔍 Diagnóstico / visita técnica</span><span class="svc-price">$300</span></div>
+  <div class="svc-item"><span>📷 Instalación cámara c/material</span><span class="svc-price">$1,800–$2,400</span></div>
+  <div class="svc-item"><span>📷 Instalación cámara s/material</span><span class="svc-price">$500</span></div>
+  <div class="svc-item"><span>🔧 Correctivo (hasta 2 cámaras)</span><span class="svc-price">$400–$600</span></div>
+  <div class="svc-item"><span>🛡️ Mantenimiento preventivo</span><span class="svc-price">$700</span></div>
+  <div class="svc-item"><span>📡 Kit 4 cámaras completo</span><span class="svc-price">$8,500</span></div>
+</div>`);
+    await showTyping(600);
+    addBubble('¿Te gustaría agendar una visita sin costo para revisar tu espacio y darte un presupuesto exacto?');
+    setReplies([
+      { label:'✅ Sí, agendar visita', action:'cxAgendar', cls:'accent' },
+      { label:'💬 Quiero más info', action:'cxMasInfo' },
+      { label:'👤 Hablar con HAL humano', action:'goAsesor' },
+      { label:'🔙 Menú ConectaX', action:'goConectaX' },
+    ]);
+  },
+
+  async cxMasInfo(){
+    await showTyping(700);
+    addBubble('Claro, cuéntame: ¿es para casa, negocio o bodega? ¿Ya tienes cámaras instaladas o es instalación nueva?');
+    setReplies([
+      { label:'🏠 Casa', action:'cxCasa' },
+      { label:'🏢 Negocio / local', action:'cxNegocio' },
+      { label:'🏭 Bodega / empresa', action:'cxBodega' },
+      { label:'🔙 Regresar', action:'cxServicios' },
+    ]);
+  },
+
+  async cxCasa(){
+    await showTyping(800);
+    addBubble('Para una casa lo más común es un kit de <b>2 a 4 cámaras</b> con DVR incluido. Te cubre entradas, cochera y patio.<br><br>Inversión aproximada: <b>$5,000 – $10,000</b> según calidad y metraje a cubrir. 📹');
+    setReplies([
+      { label:'📅 Agendar visita gratis', action:'cxAgendar', cls:'accent' },
+      { label:'📷 Ver servicios', action:'cxServicios' },
+      { label:'🔙 Regresar', action:'goConectaX' },
+    ]);
+  },
+
+  async cxNegocio(){
+    await showTyping(800);
+    addBubble('Para negocios recomendamos cámaras con <b>visión nocturna HD</b> y acceso remoto desde tu celular. Muy útil para monitoreo en tiempo real. 🏪<br><br>Inversión: <b>$8,500 – $18,000</b> según área y cantidad.');
+    setReplies([
+      { label:'📅 Agendar visita', action:'cxAgendar', cls:'accent' },
+      { label:'📷 Ver precios exactos', action:'cxServicios' },
+      { label:'🔙 Regresar', action:'goConectaX' },
+    ]);
+  },
+
+  async cxBodega(){
+    await showTyping(800);
+    addBubble('Para bodegas y empresas manejamos sistemas más robustos: NVR, cámaras IP de largo alcance y grabación en la nube. 🏭<br><br>Soluciones desde <b>$15,000</b>. Te damos cotización personalizada sin compromiso.');
+    setReplies([
+      { label:'📅 Agendar visita', action:'cxAgendar', cls:'accent' },
+      { label:'👤 Hablar con asesor', action:'goAsesor' },
+      { label:'🔙 Regresar', action:'goConectaX' },
+    ]);
+  },
+
+  async cxAgendar(){
+    await showTyping(700);
+    addBubble('⑑Perfecto! Para agendar tu visita técnica (sin costo) necesito algunos datos. ¿Puedes decirme tu nombre?');
+    ctx.step = 'cxNombre';
+    setReplies([]);
+  },
+
+  async cxSoporte(){
+    await showTyping(700);
+    addBubble('Entendido, soporte técnico. 🔧 ¿Cuál es el problema que presentas?');
+    setReplies([
+      { label:'📷 Cámara sin imagen', action:'cxSinImagen' },
+      { label:'🌙 Sin visión nocturna', action:'cxNoche' },
+      { label:'💱 No veo desde mi celular', action:'cxCelular' },
+      { label:'⚡ No enciende el equipo', action:'cxNoEnciende' },
+      { label:'👤 Hablar con técnico', action:'goAsesor' },
+    ]);
+  },
+
+  async cxSinImagen(){
+    await showTyping(900);
+    addBubble('Ese problema generalmente es por: <br>1️⃣ Cable desconectado o dañado<br>2️⃣ Cámara sin corriente<br>3️⃣ Puerto del DVR/NVR saturado<br><br>¿El problema es en <b>todas</b> las cámaras o solo una?');
+    setReplies([
+      { label:'Solo una cámara', action:'cxSoloUna' },
+      { label:'Varias / todas', action:'cxVarias' },
+      { label:'👤 Necesito técnico', action:'goAsesor' },
+    ]);
+  },
+
+  async cxSoloUna(){
+    await showTyping(700);
+    addBubble('Si es solo una, prueba esto: <br>✅ Revisa que el cable BNC/IP esté bien conectado en la parte trasera del DVR<br>✅ Verifica que la cámara tenga corriente (led encendido)<br>✅ Reinicia el canal en el DVR<br><br>Si el problema persiste, agenda un correctivo. Costo: <b>$400 –$600</b>');
+    setReplies([
+      { label:'📅 Agendar correctivo', action:'cxAgendar', cls:'accent' },
+      { label:'✅ Ya funcionó, gracias', action:'resuelto' },
+      { label:'🔙 Más problemas', action:'cxMasProblemas' },
+    ]);
+  },
+
+  async cxVarias(){
+    await showTyping(700);
+    addBubble('Si son varias cámaras lo más probable es el <b>DVR/NVR</b> o la fuente de poder. <br><br>Recomendamos una revisión técnica. ¿Agendamos?');
+    setReplies([
+      { label:'📅 Sí, agendar revisión', action:'cxAgendar', cls:'accent' },
+      { label:'👤 Hablar con técnico', action:'goAsesor' },
+    ]);
+  },
+
+  async cxNoche(){
+    await showTyping(700);
+    addBubble('Para la visión nocturna: <br>✅ Verifica que haya poca luz (las IR se activan en oscuridad)<br>✅ Limpia el lente con un paño seco<br>✅ Revisa la configuración de modo día/noche en el DVR<br><br>¿Solucionó?');
+    setReplies([
+      { label:'✅ Sí, gracias', action:'resuelto' },
+      { label:'❌ No, necesito técnico', action:'goAsesor' },
+    ]);
+  },
+
+  async cxCelular(){
+    await showTyping(800);
+    addBubble('Para ver desde tu celular necesitas: <br>1️⃣ App instalada (DMSS, gDMSS o XMEye)<br>2️⃣ DVR conectado a internet (cable o wifi)<br>3️⃣ Configurar el P2P o IP pública<br><br>¿Tienes la app instalada?');
+    setReplies([
+      { label:'✅ Sí tengo la app', action:'cxConApp' },
+      { label:'⍌ No sé cuál instalar', action:'cxMasInfo' },
+      { label:'👤 Que me apoye un técnico', action:'goAsesor' },
+    ]);
+  },
+
+  async cxConApp(){
+    await showTyping(700);
+    addBubble('Bien. El paso siguiente es verificar el <b>número de serie (S/N)</b> del DVR y escanearlo en la app para agregar el dispositivo vía P2P. ¿Necesitas que un técnico te guíe por videollamada?');
+    setReplies([
+      { label:'📞 Sí, guíame', action:'goAsesor', cls:'accent' },
+      { label:'✅ Ya lo resolvió', action:'resuelto' },
+    ]);
+  },
+
+  async cxSinApp(){ await showTyping(700); addBubble('Para Dahua descarga <b>DMSS</b> y para Hikvision <b>Hik-Connect</b>. Si es marca genérica prueba con <b>XMEye</b>. ¿Sabes la marca de tu equipo?');
+    setReplies([{ label:'📞 Prefiero que me apoyen', action:'goAsesor', cls:'accent' },{ label:'✅ Ya tengo la app', action:'cxConApp' }]);
+  },
+
+  async cxNoEnciende(){
+    await showTyping(700);
+    addBubble('Si no enciende el DVR/cámara: <br>✅ Verifica que el cable de corriente esté bien conectado<br>✅ Prueba otro contacto de luz<br>✅ Revisa si el led del adaptador enciende<br><br>Si nada funciona, puede ser la fuente dañada. Llevamos refacciones.');
+    setReplies([
+      { label:'📅 Agendar revisión', action:'cxAgendar', cls:'accent' },
+      { label:'✅ Funcionó', action:'resuelto' },
+    ]);
+  },
+
+  // ── VERDEX ──────────────────────────────────
+  async goVerdeX(){
+    setAgent('koli');
+    await showTyping(1000);
+    addBubble('¡Hola! 🐦 Soy <b>Koli</b>, asesora de <b>VerdeX</b>.<br>Me encargo de jardines, plantas y espacios verdes. ¡Hagamos crecer tu espacio! 🌱');
+    await showTyping(700);
+    addBubble('¿Qué puedo hacer por ti?');
+    setReplies([
+      { label:'🌿 Ver propuestas y precios', action:'vxPropuestas', cls:'accent-green' },
+      { label:'📅 Agendar visita de diagnóstico', action:'vxAgendar', cls:'accent-green' },
+      { label:'🔧 Mantenimiento / soporte', action:'vxMantenimiento' },
+      { label:'💬 Hablar con asesor', action:'goAsesor' },
+      { label:'🔙 Volver al inicio', action:'start' },
+    ]);
+  },
+
+  async vxPropuestas(){
+    addCard(`<h3>🌿 Propuestas VerdeX</h3>
+<div class="svc-list">
+  <div class="svc-item"><span>🌱 Propuesta Básica (hasta 10m²)</span><span class="svc-price">$2,310</span></div>
+  <div class="svc-item"><span>🌿 Propuesta Intermedia (10–25m²)</span><span class="svc-price">$4,710</span></div>
+  <div class="svc-item"><span>🌳 Propuesta Premium (jardín completo)</span><span class="svc-price">$7,310</span></div>
+  <div class="svc-item"><span>✂️ Poda de árbol pequeño</span><span class="svc-price">$400</span></div>
+  <div class="svc-item"><span>🌾 Corte de pasto + fertilización</span><span class="svc-price">$500</span></div>
+  <div class="svc-item"><span>🛤️ Caminito de grava (m²)</span><span class="svc-price">$280/m²</span></div>
+</div>`, true);
+    await showTyping(600);
+    addBubble('Todas las propuestas incluyen materiales, plantas y mano de obra. ¿Te agendo una visita de diagnóstico sin costo?');
+    setReplies([
+      { label:'✅ Sí, agendar visita', action:'vxAgendar', cls:'accent-green' },
+      { label:'🌱 Básica — cuéntame más', action:'vxBasica' },
+      { label:'🌿 Intermedia — más detalles', action:'vxIntermedia' },
+      { label:'🌳 Premium — más detalles', action:'vxPremium' },
+      { label:'🔙 Menú VerdeX', action:'goVerdeX' },
+    ]);
+  },
+
+  async vxBasica(){
+    await showTyping(700);
+    addCard(`<h3>🌱 Propuesta Básica · $2,310</h3>
+Ideal para jardines pequeños o unidad VerdeX (2.5×4m aprox.)
+<br><br>
+✅ Plantas de temporada (jazmín, bougainvillea, helechos)<br>
+✅ Tierra preparada y abono<br>
+✅ Bordeo y diseño básico<br>
+✅ Caminito de grava opcional<br>
+✅ Limpieza total del área`, true);
+    setReplies([
+      { label:'📅 Quiero esta propuesta', action:'vxAgendar', cls:'accent-green' },
+      { label:'🔙 Ver todas las propuestas', action:'vxPropuestas' },
+    ]);
+  },
+
+  async vxIntermedia(){
+    await showTyping(700);
+    addCard(`<h3>🌿 Propuesta Intermedia · $4,710</h3>
+Para jardines medianos con más variedad y detalle.
+<br><br>
+✅ Todo lo de Básica +<br>
+✅ Árbol ornamental o frutal<br>
+✅ Plantas de sombra y sol<br>
+✅ Piedra de río decorativa<br>
+✅ Fertilización y control de plagas<br>
+✅ Caminito de laja incluido`, true);
+    setReplies([
+      { label:'📅 Quiero esta propuesta', action:'vxAgendar', cls:'accent-green' },
+      { label:'🔙 Ver todas las propuestas', action:'vxPropuestas' },
+    ]);
+  },
+
+  async vxPremium(){
+    await showTyping(700);
+    addCard(`<h3>🌳 Propuesta Premium · $7,310</h3>
+Transformación completa de tu espacio verde.
+<br><br>
+✅ Todo lo de Intermedia +<br>
+✅ Árboles de ornato seleccionados<br>
+✅ Sistema de riego básico<br>
+✅ Diseño paisajístico personalizado<br>
+✅ Canto rodado + laja premium<br>
+✅ Mantenimiento del primer mes incluido`, true);
+    setReplies([
+      { label:'📅 Quiero esta propuesta', action:'vxAgendar', cls:'accent-green' },
+      { label:'🔙 Ver todas las propuestas', action:'vxPropuestas' },
+    ]);
+  },
+
+  async vxAgendar(){
+    await showTyping(700);
+    addBubble('¡Excelente elección! 🌱 La visita de diagnóstico es <b>sin costo</b>. Solo necesito tu nombre para coordinar. ¿Cómo te llamas?');
+    ctx.step = 'vxNombre';
+    setReplies([]);
+  },
+
+  async vxMantenimiento(){
+    await showTyping(700);
+    addBubble('Para mantenimiento de jardín tenemos dos modalidades: 🌿');
+    addCard(`<h3>🔧 Mantenimiento VerdeX</h3>
+<div class="svc-list">
+  <div class="svc-item"><span>🌾 Visita única de mantenimiento</span><span class="svc-price">$500–$800</span></div>
+  <div class="svc-item"><span>📅 Plan mensual preventivo</span><span class="svc-price">$800/mes</span></div>
+  <div class="svc-item"><span>✂️ Poda árbol pequeño</span><span class="svc-price">$400</span></div>
+  <div class="svc-item"><span>🌳 Poda árbol mediano</span><span class="svc-price">$700</span></div>
+  <div class="svc-item"><span>🌲 Poda árbol grande</span><span class="svc-price">$1,200</span></div>
+</div>`, true);
+    setReplies([
+      { label:'📅 Agendar mantenimiento', action:'vxAgendar', cls:'accent-green' },
+      { label:'💬 Hablar con Koli humana', action:'goAsesor' },
+      { label:'🔙 Menú VerdeX', action:'goVerdeX' },
+    ]);
+  },
+
+  // ── ASESOR ──────────────────────────────────
+  async goAsesor(){
+    setAgent('ehek');
+    await showTyping(800);
+    addBubble('¡Claro! Te conecto con un asesor humano de Grupo SotaVentoX. 🤝');
+    await showTyping(600);
+    addCard(`<h3>🧑 Contacto directo</h3>
+Toca el botón para abrir WhatsApp con nuestro asesor. Tiempo de respuesta: <b>menos de 1 hora</b> en horario laboral.
+<br><br>
+🕐 Horario: Lun–Vie 9am–7pm · Sáb 9am–2pm`);
+    setReplies([
+      { label:'💬 Abrir WhatsApp con asesor', action:'abrirWA', cls:'wa' },
+      { label:'🔙 Regresar al inicio', action:'start' },
+    ]);
+  },
+
+  async abrirWA(){
+    const msg = encodeURIComponent('Hola, vengo del chatbot de SotaVentoX y necesito atención personalizada.');
+    window.open('https://wa.me/5212296555076?text=' + msg, '_blank');
+    await showTyping(500);
+    addBubble('¡Abriendo WhatsApp! 📱 Si no se abre automáticamente, guarda el número: <b>229 655 5076</b>');
+    setReplies([{ label:'🔙 Volver al inicio', action:'start' }]);
+  },
+
+  // ── HELPERS ─────────────────────────────────
+  async resuelto(){
+    await showTyping(500);
+    addBubble('¡Qué gusto que se haya resuelto! 🎉 Recuerda que para mantenimientos preventivos y evitar futuros problemas, te recomendamos nuestro plan mensual.');
+    setReplies([
+      { label:'📋 Ver plan preventivo', action:'cxServicios' },
+      { label:'🏠 Volver al inicio', action:'start' },
+    ]);
+  },
+
+  async default(){
+    await showTyping(700);
+    addBubble('Entendido. ¿Prefiero asegurarte una respuesta precisa — con cuál de estos temas te puedo ayudar?');
+    setReplies([
+      { label:'📷 ConectaX — Cámaras', action:'goConectaX', cls:'accent' },
+      { label:'🌿 VerdeX — Jardines', action:'goVerdeX', cls:'accent-green' },
+      { label:'👤 Asesor humano', action:'goAsesor' },
+    ]);
+  },
+};
+
+// ════════════════════════════════════════════
+// STEP HANDLING (for name/text collection)
+// ════════════════════════════════════════════
+const origSendTyped = sendTyped;
+window.sendTyped = function(){
+  const inp = document.getElementById('userInput');
+  const val = inp.value.trim();
+  if(!val) return;
+
+  if(ctx.step === 'cxNombre'){
+    inp.value = '';
+    ctx.nombre = val;
+    addBubble(val, true);
+    ctx.step = '';
+    showTyping(800).then(async ()=>{
+      addBubble(`Perfecto, <b>${val}</b>! 👋 ¿Cuál es el mejor número para confirmarte la visita?`);
+      ctx.step = 'cxTelefono';
+    });
+    return;
+  }
+  if(ctx.step === 'cxTelefono'){
+    inp.value = '';
+    addBubble(val, true);
+    ctx.step = '';
+    showTyping(900).then(async ()=>{
+      addBubble(`¡Listo! ✅ <b>${ctx.nombre}</b>, tu visita técnica de ConectaX quedó agendada. Un asesor de HAL te contactará al <b>${val}</b> para confirmar fecha y hora.<br><br>Horario disponible: <b>Lun–Vie 9am–6pm</b>`);
+      setReplies([
+        { label:'💬 Abrir WhatsApp', action:'abrirWA', cls:'wa' },
+        { label:'🏠 Volver al inicio', action:'start' },
+      ]);
+    });
+    return;
+  }
+  if(ctx.step === 'vxNombre'){
+    inp.value = '';
+    ctx.nombre = val;
+    addBubble(val, true);
+    ctx.step = '';
+    showTyping(800).then(async ()=>{
+      addBubble(`¡Hola <b>${val}</b>! 🌿 ¿Cuál es tu número de WhatsApp para coordinar la visita?`);
+      ctx.step = 'vxTelefono';
+    });
+    return;
+  }
+  if(ctx.step === 'vxTelefono'){
+    inp.value = '';
+    addBubble(val, true);
+    ctx.step = '';
+    showTyping(900).then(async ()=>{
+      addBubble(`¡Excelente! 🌱 <b>${ctx.nombre}</b>, tu visita de diagnóstico VerdeX está confirmada. Koli te contactará al <b>${val}</b> para agendar el día.<br><br>🌿 ¡Pronto tu espacio va a florecer!`);
+      setReplies([
+        { label:'💬 Abrir WhatsApp', action:'abrirWA', cls:'wa' },
+        { label:'🏠 Volver al inicio', action:'start' },
+      ]);
+    });
+    return;
+  }
+
+  // Default
+  inp.value = '';
+  addBubble(val, true);
+  showTyping(700).then(()=>{ routes['default'](); });
+};
+
+// ════════════════════════════════════════════
+// BOOT
+// ════════════════════════════════════════════
+setTimeout(()=>{ routes.start(); }, 600);
+
 </script>
 </body>
 </html>
