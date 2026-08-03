@@ -808,7 +808,6 @@ footer{border-top:1px solid var(--line);background:var(--bg-elev);padding:70px 0
       <div class="proj tall reveal d1"><img src="https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?auto=format&fit=crop&w=800&q=80" alt="Paisajismo natural" loading="lazy"><div class="proj-cap"><span class="tagd vx">VerdeX</span><h4>Áreas verdes naturales</h4><p>Siembra y diseño paisajístico</p></div></div>
       <div class="proj reveal d2"><img src="https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?auto=format&fit=crop&w=700&q=80" alt="Cámara de seguridad para negocio" loading="lazy"><div class="proj-cap"><span class="tagd cx">ConectaX</span><h4>Seguridad para comercio</h4><p>Cámaras HD con visión nocturna</p></div></div>
     </div>
-    <p class="placeholder-note">Imágenes de referencia — la galería se actualizará con proyectos reales de nuestros clientes.</p>
   </div>
 </section>
 
@@ -1170,6 +1169,7 @@ var FLOWS={
 function chFlowStart(id){
   var f=FLOWS[id];
   leadNew(f.unidad,f.agente);
+  leadEnviar('parcial');            /* marca el arranque del embudo */
   cbCtx.flow=id; cbCtx.step=0;
   chReplies([]);
   return chTyping(650).then(function(){ chBubble(f.pasos[0].p); });
@@ -1185,7 +1185,9 @@ function chFlowNext(v){
     return;
   }
   LEAD[paso.c]=v;
-  if(paso.c==='telefono') leadEnviar('parcial');   /* ya es contactable */
+  /* Se reporta CADA paso (mismo folio = se actualiza, no se duplica). Así el
+     CRM puede ver hasta dónde llegó cada visitante y dónde se está cayendo. */
+  leadEnviar('parcial');
   cbCtx.step++;
   if(cbCtx.step < f.pasos.length){
     var q=f.pasos[cbCtx.step].p.replace('{v}',v);
