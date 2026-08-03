@@ -1089,26 +1089,52 @@ function leadEnviar(estado){
   d.fecha_reg= new Date().toISOString();
   d.origen   = LEAD.origen || 'chatbot-web';
   d.pagina   = location.href;
-  /* 1) respaldo local — sobrevive aunque el envío falle */
+  /* 1) envío al registro central (no bloquea la conversación) */
+  var ok = leadPost(d);
+  /* 2) respaldo local — si el envío no salió, queda pendiente de reintento */
   try{
+    var guardado={}; for(var j in d) guardado[j]=d[j];
+    guardado.enviado_ok = ok;
     var a=JSON.parse(localStorage.getItem('svx_leads')||'[]');
     a=a.filter(function(x){ return x.folio!==d.folio; });
-    a.push(d); localStorage.setItem('svx_leads',JSON.stringify(a.slice(-60)));
+    a.push(guardado); localStorage.setItem('svx_leads',JSON.stringify(a.slice(-60)));
   }catch(e){}
-  /* 2) envío al registro central (no bloquea la conversación) */
-  if(LEAD_ENDPOINT){
-    try{
-      var body=Object.keys(d).map(function(k){
-        return encodeURIComponent(k)+'='+encodeURIComponent(d[k]);
-      }).join('&');
-      if(navigator.sendBeacon){
-        navigator.sendBeacon(LEAD_ENDPOINT, new Blob([body],{type:'application/x-www-form-urlencoded'}));
-      }else{
-        fetch(LEAD_ENDPOINT,{method:'POST',mode:'no-cors',keepalive:true,
-          headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body});
-      }
-    }catch(e){}
-  }
+}
+/* Envía un prospecto al registro. Devuelve true si al menos se pudo despachar. */
+function leadPost(d){
+  if(!LEAD_ENDPOINT) return false;
+  try{
+    var body=Object.keys(d).map(function(k){
+      return encodeURIComponent(k)+'='+encodeURIComponent(d[k]);
+    }).join('&');
+    if(navigator.sendBeacon){
+      return navigator.sendBeacon(LEAD_ENDPOINT, new Blob([body],{type:'application/x-www-form-urlencoded'}));
+    }
+    fetch(LEAD_ENDPOINT,{method:'POST',mode:'no-cors',keepalive:true,
+      headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body});
+    return true;
+  }catch(e){ return false; }
+}
+/* RESCATE: si un prospecto no se pudo mandar (endpoint aún no configurado,
+   sin internet, página vieja en caché…), queda en el navegador del visitante.
+   La próxima vez que abra la página se reintenta solo. Como el registro hace
+   upsert por folio, reenviar NO duplica ni pisa el seguimiento manual. */
+function leadReintentar(){
+  if(!LEAD_ENDPOINT) return;
+  try{
+    var a=JSON.parse(localStorage.getItem('svx_leads')||'[]'), cambio=false;
+    var limite=Date.now()-72*3600*1000;   /* nada más viejo de 3 días */
+    for(var i=0;i<a.length;i++){
+      var d=a[i];
+      if(d.enviado_ok) continue;
+      var t=Date.parse(d.fecha_reg||'');
+      if(!t || t<limite){ d.enviado_ok=true; cambio=true; continue; }
+      var copia={}; for(var k in d){ if(k!=='enviado_ok') copia[k]=d[k]; }
+      copia.origen=(d.origen||'web')+'-reintento';
+      if(leadPost(copia)){ d.enviado_ok=true; cambio=true; }
+    }
+    if(cambio) localStorage.setItem('svx_leads',JSON.stringify(a));
+  }catch(e){}
 }
 /* Mensaje de WhatsApp con TODO lo que ya nos dijo — para que nadie
    le vuelva a preguntar lo mismo. */
@@ -1127,6 +1153,8 @@ function leadWAtexto(){
 window.addEventListener('pagehide',function(){
   if(LEAD && LEAD.telefono && !LEAD.enviado) leadEnviar('parcial');
 });
+/* Al abrir la página, rescata cualquier prospecto que se haya quedado sin mandar. */
+leadReintentar();
 var AGENTS={
   ehek:{name:'EHEK · SotaVentoX',status:'En línea · Asistente principal',emoji:'🌀',cls:'av-ehek',color:''},
   hal :{name:'HAL · ConectaX',status:'En línea · Asesor de seguridad',emoji:'🦅',cls:'av-hal',color:'cx'},
