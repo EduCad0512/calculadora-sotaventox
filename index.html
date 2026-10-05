@@ -1106,6 +1106,7 @@ document.getElementById('contactForm').addEventListener('submit', function(e){
   LEAD.origen='formulario-web'; LEAD.interes='';
   LEAD.nombre=n; LEAD.telefono=p; LEAD.notas=m; LEAD.enviado=true;
   leadEnviar('completo');
+  if(window.svxEvento) svxEvento('formulario',{unidad:u});
   var t='Hola, soy '+(n||'un visitante')+' y vengo de la página de Grupo SotaVentoX.\n';
   t+='\n• Folio: '+LEAD.folio;
   t+='\n• Me interesa: '+u;
@@ -1123,7 +1124,7 @@ var cbCtx={agent:'ehek',step:'',flow:'',interes:''}, cbBooted=false;
    Pega aquí la URL /exec del Web App de Google Apps Script.
    Si se deja vacía, el lead igual se guarda en el navegador y se
    entrega precargado por WhatsApp — no se pierde nada. */
-var LEAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbz1eazCvucfjPQ0gpG_oLAkTxGTKuFnLv1tlbd4o1Bo6KbSedzlFpDwkTVrA9vz2ZF5/exec';
+var LEAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbz8NPQk_ZVaNQE6UJv0fOb5HW41_rSXk4PrQ5abJC-YlesZ7vpJEF1xNCUeLiwlFB0z/exec';
 
 var LEAD = null;                      /* lead que se está capturando */
 var LEAD_ULTIMO_OK = null;            /* null = aún sin saber, true/false = confirmado */
@@ -1150,6 +1151,7 @@ function leadEnviar(estado,cb){
   d.fecha_reg= new Date().toISOString();
   d.origen   = LEAD.origen || 'chatbot-web';
   d.pagina   = location.href;
+  if(window.svxEvento) svxEvento('registro_intento',{ref:LEAD.folio,unidad:LEAD.unidad});
   /* 1) se respalda ANTES de mandar: si el envío falla, queda pendiente */
   leadGuardarLocal(d,false,false);
   /* 2) envío al registro central, con acuse de recibo real */
@@ -1380,7 +1382,7 @@ var routes={
   vxMant:function(){ cbCtx.interes='VerdeX · Mantenimiento'; return chTyping(650).then(function(){ chCard('<h5>🔧 Mantenimiento VerdeX</h5><div class="row"><span>🌾 Visita única</span><b>Según levantamiento</b></div><div class="row"><span>📅 Plan mensual</span><b>Según levantamiento</b></div><div class="row"><span>✂️ Poda árbol mediano</span><b>Según levantamiento</b></div><div class="row"><span>🌲 Poda árbol grande</span><b>Según levantamiento</b></div><br><small>Todo se cotiza según levantamiento. El plan mensual depende de la superficie y la frecuencia; la poda depende de la altura, el acceso y el retiro de residuo.</small>'); chReplies([{label:'📅 Agendar',action:'vxAgendar',cls:'vx'},{label:'👤 Hablar con Koli',action:'goAsesor'},{label:'🔙 Menú',action:'goVerdeX'}]); }); },
   /* HELPERS */
   goAsesor:function(){ chSetAgent('ehek'); return chTyping(750).then(function(){ chBubble('¡Claro! Te conecto con un asesor humano. 🤝'); return chTyping(550); }).then(function(){ chCard('<h5>🧑 Contacto directo</h5>Toca el botón para abrir WhatsApp con nuestro asesor.<br>Respuesta: <b>menos de 2 horas</b> en horario laboral.<br><br>🕐 Lun–Vie 9am–7pm · Sáb 9am–2pm'); chReplies([{label:'💬 Abrir WhatsApp',action:'goWA',cls:'wa'},{label:'🔙 Inicio',action:'start'}]); }); },
-  goWA:function(){ window.open(WA(leadWAtexto()),'_blank'); return chTyping(500).then(function(){ chBubble((LEAD&&LEAD.nombre ? '¡Abriendo WhatsApp con tus datos ya cargados! 📱' : '¡Abriendo WhatsApp! 📱')+' Si no abre, guarda el número: <b>296 105 8940</b>'); chReplies([{label:'🔙 Inicio',action:'start'}]); }); },
+  goWA:function(){ if(window.svxEvento) svxEvento('clic_whatsapp',{unidad:(LEAD&&LEAD.unidad)||'Chat'}); window.open(WA(leadWAtexto()),'_blank'); return chTyping(500).then(function(){ chBubble((LEAD&&LEAD.nombre ? '¡Abriendo WhatsApp con tus datos ya cargados! 📱' : '¡Abriendo WhatsApp! 📱')+' Si no abre, guarda el número: <b>296 105 8940</b>'); chReplies([{label:'🔙 Inicio',action:'start'}]); }); },
   resuelto:function(){ return chTyping(500).then(function(){ chBubble('¡Qué gusto que se resolvió! 🎉 Para evitar futuros problemas te recomendamos nuestro plan de mantenimiento preventivo.'); chReplies([{label:'📋 Ver plan',action:'cxServicios'},{label:'🏠 Inicio',action:'start'}]); }); },
   default:function(){ return chTyping(650).then(function(){ chBubble('¿Con cuál servicio te ayudo?'); chReplies([{label:'💻 ConectaTech',action:'goConectaX',cls:'cx'},{label:'🌿 VerdeX',action:'goVerdeX',cls:'vx'},{label:'👤 Asesor',action:'goAsesor'}]); }); }
 };
@@ -1393,7 +1395,7 @@ function toggleChat(){
   else{
     chat.classList.add('open'); fab.classList.add('open'); fab.querySelector('.ico').textContent='✕';
     $('fabBadge').style.display='none'; hideNudge();
-    if(!cbBooted){ cbBooted=true; setTimeout(function(){ routes.start(); },350); }
+    if(!cbBooted){ cbBooted=true; setTimeout(function(){ routes.start(); },350); if(window.svxEvento) svxEvento('chat_abierto'); }
   }
 }
 /* Deep-link buttons open chat into a unit */
@@ -1471,6 +1473,50 @@ setTimeout(function(){ if(!nudgeShown && !$('chat').classList.contains('open')) 
       Array.prototype.forEach.call(cards, function(c){ if(c.dataset.w) montar(c); });
     }, 400);
   });
+})();
+</script>
+<script>
+/* ═══════════ INDICADORES ANÓNIMOS → CRM (hoja EventosWeb) ═══════════
+   Cuenta visitas, chats, clics a WhatsApp y registros para la hoja
+   "Indicadores Web" del CRM. No guarda nombre, teléfono, IP ni cookies:
+   sólo un número de visita al azar que se borra al cerrar la pestaña. */
+(function(){
+  function sid(){ try{ var s=sessionStorage.getItem('svx_sid'); if(!s){ s=Math.random().toString(36).slice(2,10)+Date.now().toString(36); sessionStorage.setItem('svx_sid',s);} return s; }catch(e){ return 'sin-almacen'; } }
+  function calcFuente(){
+    var q=new URLSearchParams(location.search), u=q.get('utm_source')||q.get('fuente');
+    if(u) return u.slice(0,30);
+    if(q.get('fbclid')) return 'Facebook';
+    if(q.get('gclid')) return 'Google Ads';
+    var r=document.referrer||''; if(!r) return 'Directo';
+    var h=''; try{ h=new URL(r).hostname; }catch(e){ return 'Otro'; }
+    if(h===location.hostname) return 'Directo';
+    if(/facebook|fb\.|messenger/.test(h)) return 'Facebook';
+    if(/instagram/.test(h)) return 'Instagram';
+    if(/google\./.test(h)) return 'Google';
+    if(/bing\.|yahoo\.|duckduckgo/.test(h)) return 'Otros buscadores';
+    if(/whatsapp|wa\.me/.test(h)) return 'WhatsApp';
+    return h.replace(/^www\./,'').slice(0,30);
+  }
+  var FUENTE; try{ FUENTE=sessionStorage.getItem('svx_src')||calcFuente(); sessionStorage.setItem('svx_src',FUENTE); }catch(e){ FUENTE=calcFuente(); }
+  var DISP=/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)?'movil':'escritorio';
+  window.svxEvento=function(evento,extra){
+    if(typeof LEAD_ENDPOINT==='undefined'||!LEAD_ENDPOINT) return;
+    if(/bot|crawl|spider|preview|lighthouse/i.test(navigator.userAgent)) return;
+    var d={tipo:'evento',evento:evento,sesion:sid(),fuente:FUENTE,dispositivo:DISP,pagina:location.pathname+location.hash};
+    if(extra) for(var k in extra) d[k]=extra[k];
+    var body=Object.keys(d).map(function(k){ return encodeURIComponent(k)+'='+encodeURIComponent(d[k]==null?'':d[k]); }).join('&');
+    try{ if(navigator.sendBeacon && navigator.sendBeacon(LEAD_ENDPOINT,new Blob([body],{type:'application/x-www-form-urlencoded'}))) return; }catch(e){}
+    try{ fetch(LEAD_ENDPOINT,{method:'POST',mode:'no-cors',keepalive:true,headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body}); }catch(e){}
+  };
+  /* Una visita por pestaña */
+  try{ if(!sessionStorage.getItem('svx_v')){ sessionStorage.setItem('svx_v','1'); svxEvento('visita'); } }catch(e){ svxEvento('visita'); }
+  /* Clics en cualquier botón o enlace de WhatsApp de la página */
+  document.addEventListener('click',function(ev){
+    var a=ev.target&&ev.target.closest?ev.target.closest('a[href*="wa.me"]'):null; if(!a) return;
+    var t=''; try{ t=decodeURIComponent(a.href); }catch(e){ t=a.href; }
+    var u=/verdex/i.test(t)?'VerdeX':(/conectatech|conectax/i.test(t)?'ConectaTech':'General');
+    svxEvento('clic_whatsapp',{unidad:u});
+  },true);
 })();
 </script>
 </body>
