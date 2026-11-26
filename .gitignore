@@ -1,0 +1,11 @@
+# Grupo SotaVentoX · sotaventox.com
+# El repositorio es PÚBLICO: nada de esto debe subirse.
+_borradores/
+*_RESPALDO*
+*.psd
+fotos_originales/
+*.gs
+CAMBIOS_*.md
+.DS_Store
+Thumbs.db
+desktop.ini
