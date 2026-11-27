@@ -630,6 +630,15 @@ dialog#foto img{display:block;max-width:100%;max-height:calc(100vh - 110px);widt
 .hero-b{position:relative}
 @media (max-width:820px){ .hb-lema{display:none} .hero-b .mitad.ct .hb-chips{justify-content:flex-start} .hero-b .big{font-size:clamp(36px,11.4vw,90px)} .hero-b .mitad.ct,.hero-b .mitad.vx{padding-left:18px;padding-right:18px} .hero-b .lg .c{height:24px!important} .hero-b .lg .v{height:66px!important} }
 
+
+/* Cada bloque centrado a lo ancho de su mitad */
+@media (min-width:821px){
+  .hero-b .mitad.ct,.hero-b .mitad.vx{justify-content:center;text-align:center;padding-left:clamp(76px,6vw,110px);padding-right:clamp(76px,6vw,110px)}
+  .hero-b .mitad .mt-in,.hero-b .mitad.ct .mt-in{justify-items:center}
+  .hero-b .mitad .lg,.hero-b .mitad.ct .lg{justify-content:center}
+  .hero-b .mitad .go,.hero-b .mitad.ct .go{justify-self:center}
+  .hero-b .mitad .hb-chips,.hero-b .mitad.ct .hb-chips{justify-content:center}
+}
 </style>
 </head>
 <body>
@@ -672,7 +681,7 @@ dialog#foto img{display:block;max-width:100%;max-height:calc(100vh - 110px);widt
 
 <header class="hero-b" id="top">
   <h1 class="sr">Grupo SotaVentoX: seguridad y tecnología con ConectaTech; jardines y mantenimiento con VerdeX</h1>
-  <p class="hb-lema">Tecnología y mantenimiento para hogares, negocios y edificios</p>
+  <p class="hb-lema">Tecnología y mantenimiento para hogares y negocios</p>
   <div class="mitad ct">
     <img class="twm" src="assets/logos/x-sotaventox.svg" alt="" aria-hidden="true" width="620" height="496">
     <span class="mt-in">
