@@ -616,6 +616,31 @@ dialog#foto img{display:block;max-width:100%;max-height:calc(100vh - 110px);widt
 .fb-btn{align-self:center;margin:0 22px 24px;background:#1F3864;color:#FFFFFF}
 .fb-card[data-u="ct"] .fb-btn{background:#004AAD} .fb-card[data-u="vx"] .fb-btn{background:#2E7D32}
 .fb-btn:hover{filter:brightness(1.1)}
+
+/* Inicio: lo grande dice qué resolvemos; los servicios en etiquetas legibles */
+/* Tamaño = lo más grande que cabe: «mantenimiento.» llena el ancho de su mitad */
+.hero-b .mitad{container-type:inline-size} .hero-b .mt-in{max-width:none}
+.hero-b .big{font-size:clamp(44px,calc(100cqi / 7.05),170px);font-weight:700;line-height:.95;letter-spacing:-.015em;-webkit-text-stroke:.025em currentColor;paint-order:stroke fill;text-shadow:0 2px 18px rgba(0,0,0,.18)}
+.hero-b .mitad:hover{flex-grow:1}   /* ya no se ensancha al pasar el cursor: el texto no se corta */
+.hero-b .mitad.ct{padding-left:clamp(20px,3vw,48px)} .hero-b .mitad.vx{padding-right:clamp(20px,3vw,48px)}
+.hb-chips{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0 28px}
+.hero-b .mitad.ct .hb-chips{justify-content:flex-end}
+.hb-chips span{padding:9px 16px;border-radius:999px;border:1.5px solid rgba(255,255,255,.75);background:rgba(255,255,255,.12);color:#FFFFFF;font-weight:600;font-size:clamp(16px,1.35vw,19px)}
+.hb-lema{position:absolute;z-index:4;top:22px;left:50%;transform:translateX(-50%);margin:0;padding:6px 18px;border-radius:999px;background:rgba(31,56,100,.55);color:#FFFFFF;font-size:15px;font-weight:600;white-space:nowrap;pointer-events:none}
+.hero-b{position:relative}
+@media (max-width:820px){ .hb-lema{display:none} .hero-b .mitad.ct .hb-chips{justify-content:flex-start} .hero-b .big{font-size:clamp(36px,11.4vw,90px)} .hero-b .mitad.ct,.hero-b .mitad.vx{padding-left:18px;padding-right:18px} .hero-b .lg .c{height:24px!important} .hero-b .lg .v{height:66px!important} }
+
+/* Letrón: en computadora cada unidad va a todo lo ancho (al doble no caben lado a lado) */
+@media (min-width:821px){
+  .hero-b{flex-direction:column;min-height:0}
+  .hero-b .mitad{flex:0 0 auto;align-items:flex-start;padding:64px clamp(32px,5vw,80px) 72px}
+  .hero-b .mitad.ct{padding-top:96px;justify-content:flex-start;text-align:left;padding-right:clamp(32px,5vw,80px);padding-left:clamp(32px,5vw,80px)}
+  .hero-b .mitad.ct .mt-in{justify-items:start} .hero-b .mitad.ct .lg{justify-content:flex-start} .hero-b .mitad.ct .go{justify-self:start}
+  .hero-b .mitad.ct .hb-chips{justify-content:flex-start}
+  .hero-b .mitad.vx{padding-left:clamp(32px,5vw,80px);padding-top:84px}
+  .hero-b .big{font-size:clamp(90px,min(calc(100cqi / 7.05),11.4vw),230px);line-height:.92}
+  .hero-b .sello{align-self:flex-end;margin-right:clamp(110px,14vw,220px)}
+}
 </style>
 </head>
 <body>
@@ -657,13 +682,14 @@ dialog#foto img{display:block;max-width:100%;max-height:calc(100vh - 110px);widt
 <!-- ═══════════ HERO ═══════════ -->
 
 <header class="hero-b" id="top">
-  <h1 class="sr">Grupo SotaVentoX: cuidamos tu casa y tu negocio, por dentro y por fuera</h1>
+  <h1 class="sr">Grupo SotaVentoX: seguridad y tecnología con ConectaTech; jardines y mantenimiento con VerdeX</h1>
+  <p class="hb-lema">Tecnología y mantenimiento para hogares, negocios y edificios</p>
   <div class="mitad ct">
     <img class="twm" src="assets/logos/x-sotaventox.svg" alt="" aria-hidden="true" width="620" height="496">
     <span class="mt-in">
       <span class="lg"><img class="c" src="assets/logos/conectatech-blanco.svg" alt="ConectaTech" width="246" height="30"></span>
-      <span class="big">Por<br>dentro.</span>
-      <span class="d">Tu negocio protegido y en orden: <b>cámaras, puntos de venta, páginas web y apps.</b></span>
+      <span class="big">Seguridad y<br>tecnología.</span>
+      <span class="hb-chips"><span>Cámaras de seguridad</span><span>Puntos de venta</span><span>Páginas web y apps</span></span>
       <a class="go" href="#conectatech">Conoce ConectaTech <span aria-hidden="true">→</span></a>
     </span>
   </div>
@@ -672,8 +698,8 @@ dialog#foto img{display:block;max-width:100%;max-height:calc(100vh - 110px);widt
     <img class="twm" src="assets/logos/x-sotaventox.svg" alt="" aria-hidden="true" width="620" height="496">
     <span class="mt-in">
       <span class="lg lgv"><img class="v" src="assets/logos/verdex-blanco.svg" alt="VerdeX" width="205" height="102"></span>
-      <span class="big">Por<br>fuera.</span>
-      <span class="d">Tu casa bien cuidada: <b>jardines, pintura e impermeabilización.</b></span>
+      <span class="big">Jardines y<br>mantenimiento.</span>
+      <span class="hb-chips"><span>Jardinería</span><span>Poda</span><span>Pintura</span></span>
       <a class="go" href="#verdex">Conoce VerdeX <span aria-hidden="true">→</span></a>
     </span>
   </div>
@@ -1501,6 +1527,7 @@ function vientoFondo(box,rgb,fijo,op){
      - Cada parcela de aire tiene inercia: cambia de rumbo poco a poco (por eso las líneas se curvan, no se quiebran).
      - Cursor sin clic: el aire se abre suave a su alrededor y, si lo mueves, lo arrastra un poco (ráfaga).
      - Clic: remolino como el del centro de la X. Varios clics seguidos lo hacen crecer (con tope) y luego se calma solo.
+     - Presionar y dejar quieto (más de 1/3 de segundo): el aire se calma alrededor, como una mano que lo detiene.
      - Clic sostenido y arrastrar: ráfaga más fuerte que sigue tu movimiento. */
   if(!box) return;
   if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -1509,22 +1536,31 @@ function vientoFondo(box,rgb,fijo,op){
   box.insertBefore(cv,box.firstChild);
   var ctx=cv.getContext('2d'); if(!ctx) return;
   var W=0,H=0,dpr=1,P=[],vivo=false,raf=0,LARGO=18,VEL=1.0,CUBOS=8,U=3.4,A=34;
-  var cur={on:false,down:false,x:0,y:0,vx:0,vy:0,t:0}, rem={e:0,x:0,y:0};
+  var cur={on:false,down:false,x:0,y:0,vx:0,vy:0,t:0}, R=[], MAXR=4;   /* hasta 4 remolinos a la vez */
+  function radio(r){ return 40+r.e*18; }
   function base(x,y){ var vx=-0.32+Math.sin(y*0.012+x*0.004)*0.10, vy=1, n=Math.sqrt(vx*vx+vy*vy); return [vx/n,vy/n]; }
   function campo(x,y){
-    var b=base(x,y), vx=b[0], vy=b[1];
+    var b=base(x,y), vx=b[0], vy=b[1], kb=1;
+    for(var i=0;i<R.length;i++){ var r=R[i], qx=x-r.x, qy=y-r.y, qd=Math.sqrt(qx*qx+qy*qy), qr=radio(r);
+      if(qd<qr*1.35){ var t=Math.min(1,Math.max(0,(qr*1.35-qd)/(qr*0.6))); kb=Math.min(kb,1-0.92*t*t*(3-2*t)); } }   /* dentro de cada remolino el viento general cede */
+    if(cur.calma){ var cx2=x-cur.x, cy2=y-cur.y, cd=Math.sqrt(cx2*cx2+cy2*cy2);
+      if(cd<170) kb*=0.15+0.85*Math.min(1,cd/170); }                                          /* mano quieta: el aire se calma alrededor */
+    vx*=kb; vy*=kb;
     if(cur.on){ var dx=x-cur.x, dy=y-cur.y, d2=dx*dx+dy*dy, d=Math.sqrt(d2)||1;
       var ob=Math.exp(-d2/(A*A*1.8))*0.9; vx+=dx/d*ob; vy+=dy/d*ob;                       /* el aire se abre alrededor */
       var g=Math.exp(-d2/(110*110))*(cur.down?0.75:0.4); vx+=cur.vx/U*g; vy+=cur.vy/U*g; } /* ráfaga del cursor */
-    if(rem.e>0.05){ var ex=x-rem.x, ey=y-rem.y, dd=Math.sqrt(ex*ex+ey*ey)||1, rr=40+rem.e*18;
-      if(dd<rr){ var pr=Math.sin(Math.PI*Math.min(1,dd/rr)), f=(0.5+rem.e*0.32)*pr; vx+=(-ey/dd)*f-ex/dd*f*0.18; vy+=(ex/dd)*f-ey/dd*f*0.18; } }
-    var m=Math.sqrt(vx*vx+vy*vy)||1, k=Math.max(0.3,Math.min(3,m))/m; return [vx*k,vy*k];
+    for(var j=0;j<R.length;j++){ var r=R[j], ex=x-r.x, ey=y-r.y, dd=Math.sqrt(ex*ex+ey*ey)||1, rr=radio(r);
+      if(dd<rr*1.3){ var pr=dd<rr*0.3?dd/(rr*0.3):(dd<rr?1:1-(dd-rr)/(rr*0.3)), f=(0.9+r.e*0.12)*pr; vx+=(-ey/dd)*f-ex/dd*f*0.16; vy+=(ex/dd)*f-ey/dd*f*0.16; } }
+    var m=Math.sqrt(vx*vx+vy*vy)||1, k=Math.max(0.05,Math.min(2.2,m))/m; return [vx*k,vy*k];
   }
-  function nueva(p,ini){ p.x=Math.random()*(W+160)-20; p.y=Math.random()*(H+60)-60; p.vida=140+Math.random()*220; p.edad=ini?Math.random()*p.vida:0;
+  function nueva(p,ini){ p.x=Math.random()*(W+160)-20; p.y=Math.random()*(H+60)-60;
+    if(!ini&&R.length&&Math.random()<0.35){ var r=R[Math.floor(Math.random()*R.length)];
+      if(r.e>0.4){ var an=Math.random()*6.283, rd=radio(r)*(0.25+Math.random()*0.7); p.x=r.x+Math.cos(an)*rd; p.y=r.y+Math.sin(an)*rd; } }  /* cada remolino jala aire */
+    p.vida=140+Math.random()*220; p.edad=ini?Math.random()*p.vida:0;
     p.v=VEL*(0.75+Math.random()*0.5); p.g=0.35+Math.random()*0.65; p.h=[]; p.fin=false; p.a=0; var b=base(p.x,p.y); p.ux=b[0]; p.uy=b[1]; return p; }
   function medir(){ var r=fijo?{width:innerWidth,height:innerHeight}:box.getBoundingClientRect(); dpr=Math.min(window.devicePixelRatio||1,2); W=r.width; H=r.height;
     cv.width=Math.round(W*dpr); cv.height=Math.round(H*dpr); ctx.setTransform(dpr,0,0,dpr,0,0);
-    U=3.4*Math.max(1,Math.min(1.8,H/700));   /* en pantallas grandes avanza proporcional, para que cruce en el mismo tiempo */
+    U=3.4*Math.max(1,Math.min(1.8,(fijo?H:Math.min(H,innerHeight))/700));   /* en pantallas grandes avanza proporcional, para que cruce en el mismo tiempo */
     var n=Math.round(Math.min(NMAX,Math.max(120,W*H/DENS))); P=[]; for(var i=0;i<n;i++) P.push(nueva({},true)); }
   function linea(h){                         /* curva suave por los puntos medios (sin quiebres) */
     ctx.moveTo(h[0],h[1]);
@@ -1532,13 +1568,14 @@ function vientoFondo(box,rgb,fijo,op){
     ctx.lineTo(h[h.length-2],h[h.length-1]);
   }
   function paso(dib){
-    dib=(dib!==false); cur.vx*=0.9; cur.vy*=0.9; rem.e*=0.994;
+    dib=(dib!==false); cur.vx*=0.9; cur.vy*=0.9; for(var q=R.length-1;q>=0;q--){ R[q].e*=0.996; if(R[q].e<0.05) R.splice(q,1); }
     if(dib){ ctx.clearRect(0,0,W,H); ctx.lineWidth=GROSOR; ctx.lineCap='round'; ctx.lineJoin='round'; }
     var cubos=[]; for(var k=0;k<CUBOS;k++) cubos.push([]);
     for(var i=0;i<P.length;i++){ var p=P[i];
       if(p.fin){ p.a*=0.92; p.h.splice(0,2); if(p.h.length<4||p.a<0.02){ nueva(p,false); continue; } }
       else{ var c=campo(p.x,p.y);
-        p.ux+=(c[0]-p.ux)*0.14; p.uy+=(c[1]-p.uy)*0.14;           /* inercia: gira suave */
+        var ia=0.14; for(var q=0;q<R.length;q++){ var rx=p.x-R[q].x, ry=p.y-R[q].y, rq=radio(R[q]); if(rx*rx+ry*ry<rq*rq){ ia=0.3; break; } }
+        p.ux+=(c[0]-p.ux)*ia; p.uy+=(c[1]-p.uy)*ia;           /* inercia: gira suave */
         p.x+=p.ux*p.v*U; p.y+=p.uy*p.v*U; p.h.push(p.x,p.y); if(p.h.length>LARGO*2) p.h.splice(0,2);
         p.edad++; p.a=Math.sin(Math.PI*Math.min(0.5,p.edad/p.vida))*p.g;
         if(p.edad>p.vida*0.5&&Math.random()<0.004||p.y>H+20||p.x<-40||p.x>W+60||p.edad>p.vida*1.6) p.fin=true; }
@@ -1565,13 +1602,19 @@ function vientoFondo(box,rgb,fijo,op){
     cur.x=x; cur.y=y; cur.t=t; cur.on=true; }
   var tgt=fijo?window:box;
   tgt.addEventListener('pointermove',pos,{passive:true});
-  tgt.addEventListener('pointerdown',function(e){ pos(e); cur.down=true;
+  var tCalma=0;
+  tgt.addEventListener('pointerdown',function(e){ pos(e); cur.down=true; cur.calma=false; cur.dx0=cur.x; cur.dy0=cur.y;
+    clearTimeout(tCalma);
+    tCalma=setTimeout(function(){ if(cur.down&&Math.abs(cur.x-cur.dx0)<12&&Math.abs(cur.y-cur.dy0)<12){ cur.calma=true; var c=cerca(cur.x,cur.y,170); if(c) c.e=Math.max(0,c.e-1.5); } },350);   /* presionar y no mover = calmar */
     if(!REMO) return;
-    var dx=cur.x-rem.x, dy=cur.y-rem.y;
-    if(rem.e<0.3||dx*dx+dy*dy>140*140){ rem.x=cur.x; rem.y=cur.y; rem.e=Math.max(rem.e*0.5,0); }
-    else { rem.x+=(cur.x-rem.x)*0.3; rem.y+=(cur.y-rem.y)*0.3; }
-    rem.e=Math.min(6,rem.e+1.2); },{passive:true});
-  window.addEventListener('pointerup',function(){ cur.down=false; },{passive:true});
+    var r=cerca(cur.x,cur.y,140);
+    if(r){ r.x+=(cur.x-r.x)*0.3; r.y+=(cur.y-r.y)*0.3; }            /* clic cerca de uno: lo hace crecer */
+    else { r={x:cur.x,y:cur.y,e:0};                                  /* clic en otro lado: remolino nuevo, el anterior sigue */
+      if(R.length>=MAXR){ var dbl=0; for(var q=1;q<R.length;q++) if(R[q].e<R[dbl].e) dbl=q; R.splice(dbl,1); }
+      R.push(r); }
+    r.e=Math.min(6,r.e+1.5); },{passive:true});
+  function cerca(x,y,lim){ var m=null, md=lim*lim; for(var q=0;q<R.length;q++){ var dx=x-R[q].x, dy=y-R[q].y, d=dx*dx+dy*dy; if(d<md){ md=d; m=R[q]; } } return m; }
+  window.addEventListener('pointerup',function(){ cur.down=false; cur.calma=false; clearTimeout(tCalma); },{passive:true});
   (fijo?document.documentElement:box).addEventListener('pointerleave',function(){ cur.on=false; cur.down=false; cur.t=0; });
   tgt.addEventListener('pointerup',function(e){ if(e.pointerType!=='mouse'){ cur.on=false; cur.t=0; } },{passive:true});
   tgt.addEventListener('pointercancel',function(){ cur.on=false; cur.down=false; cur.t=0; },{passive:true});
