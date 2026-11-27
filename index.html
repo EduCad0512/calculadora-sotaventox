@@ -1410,7 +1410,7 @@ setTimeout(showNudge,14000);
       var ex=x-cur.x, ey=y-cur.y, dd=Math.sqrt(ex*ex+ey*ey), rr=cur.r/s;
       if(dd<rr&&dd>0.01){ var g=(1-dd/rr)*2.6; vx+=(-ey/dd)*g - ex/dd*g*0.35; vy+=(ex/dd)*g - ey/dd*g*0.35; }
     }
-    var n=Math.sqrt(vx*vx+vy*vy)||1, v=vel*2.3*VEL;
+    var n=Math.sqrt(vx*vx+vy*vy)||1, v=vel*4.6*VEL;
     return [vx/n*v, vy/n*v];
   }
   function mover(p){
@@ -1442,7 +1442,7 @@ setTimeout(showNudge,14000);
   }
   /* Trazos delgados de largo fijo. Nacen apareciendo poco a poco, recorren todo el mapa
      y al salir (o al topar) se apagan suave mientras la cola alcanza a la punta. */
-  var LARGO=60, CUBOS=8, RP=null, FUERA=null;
+  var LARGO=34, CUBOS=8, RP=null, FUERA=null;
   function recortes(){
     if(RP) return; RP=new Path2D(); FUERA=new Path2D();
     FUERA.rect(VB.x-200,VB.y-200,VB.w+400,VB.h+400);
@@ -1475,7 +1475,7 @@ setTimeout(showNudge,14000);
      (60, 120 o 144 Hz) y aunque el navegador dibuje menos cuadros. */
   var ult=0, acu=0;
   function bucle(t){ if(!vivo) return; if(!ult) ult=t; acu+=Math.min(250,t-ult); ult=t;
-    var n=Math.floor(acu/16.667); if(n>0){ acu-=n*16.667; if(n>4){ n=4; acu=0; } for(var z=1;z<n;z++) paso(false); paso(true); }
+    var n=Math.floor(acu/16.667); if(n>0){ acu-=n*16.667; if(n>8){ n=8; acu=0; } for(var z=1;z<n;z++) paso(false); paso(true); }
     raf=requestAnimationFrame(bucle); }
   function arrancar(){ if(vivo||quieto) return; vivo=true; ult=0; acu=0; raf=requestAnimationFrame(bucle); }
   function parar(){ vivo=false; cancelAnimationFrame(raf); }
@@ -1508,7 +1508,7 @@ function vientoFondo(box,rgb,fijo,op){
   var cv=document.createElement('canvas'); cv.className=fijo?'viento-pagina':'viento-fondo'; cv.setAttribute('aria-hidden','true');
   box.insertBefore(cv,box.firstChild);
   var ctx=cv.getContext('2d'); if(!ctx) return;
-  var W=0,H=0,dpr=1,P=[],vivo=false,raf=0,LARGO=30,VEL=1.0,CUBOS=8,U=1.6,A=34;
+  var W=0,H=0,dpr=1,P=[],vivo=false,raf=0,LARGO=18,VEL=1.0,CUBOS=8,U=3.4,A=34;
   var cur={on:false,down:false,x:0,y:0,vx:0,vy:0,t:0}, rem={e:0,x:0,y:0};
   function base(x,y){ var vx=-0.32+Math.sin(y*0.012+x*0.004)*0.10, vy=1, n=Math.sqrt(vx*vx+vy*vy); return [vx/n,vy/n]; }
   function campo(x,y){
@@ -1524,6 +1524,7 @@ function vientoFondo(box,rgb,fijo,op){
     p.v=VEL*(0.75+Math.random()*0.5); p.g=0.35+Math.random()*0.65; p.h=[]; p.fin=false; p.a=0; var b=base(p.x,p.y); p.ux=b[0]; p.uy=b[1]; return p; }
   function medir(){ var r=fijo?{width:innerWidth,height:innerHeight}:box.getBoundingClientRect(); dpr=Math.min(window.devicePixelRatio||1,2); W=r.width; H=r.height;
     cv.width=Math.round(W*dpr); cv.height=Math.round(H*dpr); ctx.setTransform(dpr,0,0,dpr,0,0);
+    U=3.4*Math.max(1,Math.min(1.8,H/700));   /* en pantallas grandes avanza proporcional, para que cruce en el mismo tiempo */
     var n=Math.round(Math.min(NMAX,Math.max(120,W*H/DENS))); P=[]; for(var i=0;i<n;i++) P.push(nueva({},true)); }
   function linea(h){                         /* curva suave por los puntos medios (sin quiebres) */
     ctx.moveTo(h[0],h[1]);
@@ -1553,7 +1554,7 @@ function vientoFondo(box,rgb,fijo,op){
      (60, 120 o 144 Hz) y aunque el navegador dibuje menos cuadros. */
   var ult=0, acu=0;
   function bucle(t){ if(!vivo) return; if(!ult) ult=t; acu+=Math.min(250,t-ult); ult=t;
-    var n=Math.floor(acu/16.667); if(n>0){ acu-=n*16.667; if(n>4){ n=4; acu=0; } for(var z=1;z<n;z++) paso(false); paso(true); }
+    var n=Math.floor(acu/16.667); if(n>0){ acu-=n*16.667; if(n>8){ n=8; acu=0; } for(var z=1;z<n;z++) paso(false); paso(true); }
     raf=requestAnimationFrame(bucle); }
   function arrancar(){ if(vivo) return; vivo=true; ult=0; acu=0; raf=requestAnimationFrame(bucle); }
   function parar(){ vivo=false; cancelAnimationFrame(raf); }
